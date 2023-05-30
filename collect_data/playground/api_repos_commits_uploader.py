@@ -179,7 +179,7 @@ def collect_api_repos_commits(repo_full_name):
     cur = conn.cursor()
     cur.execute("SELECT sha FROM adhoc.api_repos_commits WHERE repo_full_name = %s", (repo_full_name,))
     result = cur.fetchall()
-    saved_sha_set = {row[0] for row in result}
+    saved_sha_set = set(row[0] for row in result)
 
     cur.close()
     conn.close()
