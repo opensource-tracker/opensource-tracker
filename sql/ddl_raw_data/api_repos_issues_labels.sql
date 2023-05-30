@@ -8,3 +8,4 @@ CREATE TABLE adhoc.api_repos_issuses_labels (
   description TEXT,
   repo_full_name VARCHAR(255) NOT NULL
 );
+
