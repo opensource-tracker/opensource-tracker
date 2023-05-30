@@ -179,7 +179,7 @@ def collect_api_repos_commits(repo_full_name):
     cur = conn.cursor()
     cur.execute("SELECT sha FROM adhoc.api_repos_commits WHERE repo_full_name = %s", (repo_full_name,))
     result = cur.fetchall()
-    saved_sha_list = [row[0] for row in result]
+    saved_sha_set = {row[0] for row in result}
 
     cur.close()
     conn.close()
@@ -188,7 +188,7 @@ def collect_api_repos_commits(repo_full_name):
     for commit in commits:
         sha = commit['sha']
 
-        if sha in saved_sha_list:
+        if sha in saved_sha_set:
             continue
 
         node_id = commit['node_id']
@@ -259,5 +259,5 @@ def collect_api_repos_commits(repo_full_name):
 
 
 if __name__ == '__main__':
-    repo_full_name = 'nhn/tui.calendar'
+    repo_full_name = 'nhn/gameanvil.sample-game-client-unity'
     collect_api_repos_commits(repo_full_name)
