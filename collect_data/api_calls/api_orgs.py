@@ -11,10 +11,6 @@ HEADERS = {
 }
 
 
-ORGS = ['moloco', 'woowabros', 'daangn', 'toss',
-        'ncsoft', 'line', 'kakao', 'naver', 'nhn']
-
-
 def get_json(url):
     """
     url로 api 요청을 보내고, 응답값을 json 형태로 반환하는 함수입니다.
@@ -73,7 +69,7 @@ def clean_orgs_data(repo_content):
     }
 
 
-def collect_api_orgs():
+def collect_api_orgs(ORGS):
     """
     위 모든 함수들을 종합하여 순차적으로 실행하는 함수로, organization 정보의 집합을 반환합니다.
 
