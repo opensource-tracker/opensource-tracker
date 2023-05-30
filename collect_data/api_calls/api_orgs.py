@@ -73,6 +73,9 @@ def collect_api_orgs(ORGS):
     """
     위 모든 함수들을 종합하여 순차적으로 실행하는 함수로, organization 정보의 집합을 반환합니다.
 
+    Args:
+        ORGS (list) -> 정보를 가져올 조직 목록을 인자로 받습니다.
+
     Returns:
         list(dict) -> 각 조직의 정보(dict)를 리스트에 합쳐서 반환합니다.
     """
