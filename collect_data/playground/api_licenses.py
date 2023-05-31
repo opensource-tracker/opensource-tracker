@@ -27,7 +27,7 @@ def github_api(uri, github_token):
         'X-GitHub-Api-Version': '2022-11-28',
     }
     res = requests.get(url, headers=headers)
-    return res.json()
+    return res
 
 def execute_insert_license(cursor, license_dict):
     insert_query = """
@@ -50,12 +50,12 @@ def execute_insert_license(cursor, license_dict):
     ])
 
 if __name__ == '__main__':
-    res = github_api('/licenses', github_token).json()
+    res = github_api('/licenses', github_token)
 
     with conn:
         with conn.cursor() as cursor:
             for license in res:
                 key = license["key"]
                 print(f'for {key}...')
-                license_dict = github_api(f'/licenses/{key}', github_token).json()
+                license_dict = github_api(f'/licenses/{key}', github_token)
                 execute_insert_license(cursor, license_dict)
