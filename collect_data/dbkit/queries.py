@@ -41,6 +41,7 @@ VALUES
 %(timeline_url)s, %(state_reason)s, %(login_user)s, %(called_at)s, %(repo_full_name)s)
 """
 
+
 API_REPOS_COMMITS_TABLE_INSERT_SQL = """
 INSERT INTO adhoc.api_repos_commits
 (sha, node_id, commit_author_name, commit_author_email, commit_author_date,
