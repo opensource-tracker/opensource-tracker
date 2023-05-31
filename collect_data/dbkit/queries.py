@@ -46,13 +46,13 @@ VALUES
 """
 
 API_REPOS_TABLE_INSERT_SQL = """
-INSERT INTO adhoc.api_repos (repo_id, node_id, owner_id, name, full_name, description, private, html_url, \
-url, homepage, fork, created_at, updated_at, pushed_at, called_at, size, stargazers_count, forks_count, \
+INSERT INTO adhoc.api_repos (repo_id, node_id, owner_id, name, full_name, description, private, html_url,
+url, homepage, fork, created_at, updated_at, pushed_at, called_at, size, stargazers_count, forks_count,
 open_issues_count, language, archived, disabled, license, allow_forking)
 VALUES
-(%(repo_id)s, %(node_id)s, %(owner_id)s, %(name)s, %(full_name)s, %(description)s, %(private)s, %(html_url)s, \
-%(url)s, %(homepage)s, %(fork)s, %(created_at)s, %(updated_at)s, %(pushed_at)s, %(called_at)s, %(size)s, \
-%(stargazers_count)s, %(forks_count)s, %(open_issues_count)s, %(language)s, %(archived)s, %(disabled)s, %(license)s, \
+(%(repo_id)s, %(node_id)s, %(owner_id)s, %(name)s, %(full_name)s, %(description)s, %(private)s, %(html_url)s,
+%(url)s, %(homepage)s, %(fork)s, %(created_at)s, %(updated_at)s, %(pushed_at)s, %(called_at)s, %(size)s,
+%(stargazers_count)s, %(forks_count)s, %(open_issues_count)s, %(language)s, %(archived)s, %(disabled)s, %(license)s,
 %(allow_forking)s)
 """
 
