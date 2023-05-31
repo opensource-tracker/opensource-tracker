@@ -4,7 +4,8 @@ from api_calls.api_orgs import collect_api_orgs
 from api_calls.api_repos_licenses import collect_api_repos_licenses
 from api_calls.api_licenses import collect_api_licenses
 from dbkit.db_connector import psqlConnector
-from dbkit.queries import API_ORGS_TABLE_INSERT_SQL, API_LICENSES_TABLE_INSERT_SQL, API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL
+from dbkit.queries import API_ORGS_TABLE_INSERT_SQL, API_LICENSES_TABLE_INSERT_SQL, \
+    API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL
 from dotenv import load_dotenv
 
 load_dotenv()

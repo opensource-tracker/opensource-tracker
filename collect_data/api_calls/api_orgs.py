@@ -1,5 +1,5 @@
 from common import github_api
-from typing import Dict, List
+from typing import Dict
 
 def create_org_dict(json: Dict, CURRENT_TIME:str):
     """
