@@ -1,17 +1,8 @@
 from yarl import URL
 import requests
-import datetime
-import os
 
 
-HEADERS = {
-    'Accept': 'application/vnd.github+json',
-    'Authorization': f'Bearer {os.environ.get("GITHUB_TOKEN")}',
-    'X-GitHub-Api-Version': '2022-11-28'
-}
-
-
-def get_json(url):
+def get_json(url, HEADERS):
     """
     url로 api 요청을 보내고, 응답값을 json 형태로 반환하는 함수입니다.
 
@@ -25,18 +16,7 @@ def get_json(url):
     return req.json()
 
 
-def get_current_time():
-    """
-    현재 시간과 날짜를 문자열 형태로 반환하는 함수입니다.
-
-    Returns:
-        str -> 2023-05-30 18:42:24
-    """
-    current_datetime = datetime.datetime.now()
-    return current_datetime.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def clean_orgs_data(repo_content):
+def clean_orgs_data(repo_content, CURRENT_TIME):
     """
     organization api 요청 응답 값을 DB에 적재하기 알맞은 형태로 정제하는 함수입니다.
 
@@ -65,11 +45,11 @@ def clean_orgs_data(repo_content):
         'type': repo_content['type'],
         'created_at': repo_content['created_at'],
         'updated_at': repo_content['updated_at'],
-        'called_at': get_current_time()
+        'called_at': CURRENT_TIME
     }
 
 
-def collect_api_orgs(ORGS):
+def collect_api_orgs(HEADERS, ORGS, CURRENT_TIME):
     """
     위 모든 함수들을 종합하여 순차적으로 실행하는 함수로, organization 정보의 집합을 반환합니다.
 
@@ -82,8 +62,8 @@ def collect_api_orgs(ORGS):
     data = []
     for org_name in ORGS:
         url = URL('https://api.github.com').with_path(f'orgs/{org_name}')
-        json_data = get_json(url)
-        values = clean_orgs_data(json_data)
+        json_data = get_json(url, HEADERS)
+        values = clean_orgs_data(json_data, CURRENT_TIME)
         if values['name'] is None:  # name이 없을 경우 명시적으로 회사명 입력하기
             values['name'] = org_name
         data.append(values)
