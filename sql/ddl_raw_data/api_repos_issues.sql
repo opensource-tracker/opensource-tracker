@@ -1,5 +1,4 @@
 CREATE TABLE adhoc.api_repos_issues (
-    id SERIAL PRIMARY KEY,
     repository_url TEXT NOT NULL,
     labels_url TEXT,
     comments_url TEXT,
