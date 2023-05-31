@@ -25,7 +25,7 @@ class psqlConnector:
             _cur.execute(query, values)
             self.conn.commit()
 
-            print(f">>> Successfully inserted data into table")
+            print(">>> Successfully inserted data into table")
 
         except psycopg2.Error as e:
             self.conn.rollback()
