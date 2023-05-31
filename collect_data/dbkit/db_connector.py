@@ -16,8 +16,10 @@ class psqlConnector:
         self.cur = self.conn.cursor()
         return self.cur
 
-    def select_data(self):
-        pass
+    def select_data(self, query):
+        _cur = self._database()
+        _cur.execute(query)
+        return _cur.fetchall()
 
     def insert_data(self, query, values):
         _cur = self._database()

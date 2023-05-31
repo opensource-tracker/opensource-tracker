@@ -25,3 +25,7 @@ INSERT INTO adhoc.api_repos_licenses
 VALUES
 (%(repo_full_name)s, %(license_key)s, %(sha)s, %(html_url)s, %(download_url)s, %(git_url)s, %(content)s, %(called_at)s)
 """
+
+API_REPOS_SELECT_FULL_NAME_SQL = """
+SELECT (full_name) FROM adhoc.api_repos
+"""
