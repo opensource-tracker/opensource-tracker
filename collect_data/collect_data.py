@@ -58,7 +58,7 @@ def run():
 
 
     # issues 데이터 처리
-    issues_data = collect_api_repos_issues(HEADERS, CURRENT_TIME, repos)
+    issues_data = collect_api_repos_issues(HEADERS, repos, CURRENT_TIME)
     for values in issues_data:
         db.insert_data(API_REPOS_ISSUES_TABLE_INSERT_SQL, values)
 
