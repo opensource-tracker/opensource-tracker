@@ -20,7 +20,7 @@ def github_api(uri: str, headers: Dict):
             'Authorization': 'Bearer ' + <github_access_token>,
             'X-GitHub-Api-Version': '2022-11-28',
         }
-        data = github_api('/repos/owner/repo', headers)
+        data = github_api('/repos/owner/repo', headers).json()
     """
     url = f'https://api.github.com{uri}'
     response = requests.get(url, headers=headers)
