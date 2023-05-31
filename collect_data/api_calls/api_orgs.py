@@ -1,7 +1,7 @@
-from yarl import URL
-from collect_data.common import github_api
+from common import github_api
+from typing import Dict, List
 
-def clean_orgs_data(repo_content, CURRENT_TIME):
+def create_org_dict(json: Dict, CURRENT_TIME:str):
     """
     organization api 요청 응답 값을 DB에 적재하기 알맞은 형태로 정제하는 함수입니다.
 
@@ -9,27 +9,27 @@ def clean_orgs_data(repo_content, CURRENT_TIME):
         dict
     """
     return {
-        'orgs_id': repo_content['id'],
-        'node_id': repo_content['node_id'],
-        'name': repo_content['name'],
-        'description': repo_content['description'],
-        'company': repo_content['company'],
-        'blog': repo_content['blog'],
-        'location': repo_content['location'],
-        'email': repo_content['email'],
-        'twitter_username': repo_content['twitter_username'],
-        'followers': repo_content['followers'],
-        'following': repo_content['following'],
-        'is_verified': repo_content['is_verified'],
-        'has_organization_projects': repo_content['has_organization_projects'],
-        'has_repository_projects': repo_content['has_repository_projects'],
-        'public_repos': repo_content['public_repos'],
-        'public_gists': repo_content['public_gists'],
-        'html_url': repo_content['html_url'],
-        'avatar_url': repo_content['avatar_url'],
-        'type': repo_content['type'],
-        'created_at': repo_content['created_at'],
-        'updated_at': repo_content['updated_at'],
+        'orgs_id': json['id'],
+        'node_id': json['node_id'],
+        'name': json['name'],
+        'description': json['description'],
+        'company': json['company'],
+        'blog': json['blog'],
+        'location': json['location'],
+        'email': json['email'],
+        'twitter_username': json['twitter_username'],
+        'followers': json['followers'],
+        'following': json['following'],
+        'is_verified': json['is_verified'],
+        'has_organization_projects': json['has_organization_projects'],
+        'has_repository_projects': json['has_repository_projects'],
+        'public_repos': json['public_repos'],
+        'public_gists': json['public_gists'],
+        'html_url': json['html_url'],
+        'avatar_url': json['avatar_url'],
+        'type': json['type'],
+        'created_at': json['created_at'],
+        'updated_at': json['updated_at'],
         'called_at': CURRENT_TIME
     }
 
@@ -46,9 +46,9 @@ def collect_api_orgs(HEADERS, ORGS, CURRENT_TIME):
     """
     data = []
     for org_name in ORGS:
-        url = URL('https://api.github.com').with_path(f'orgs/{org_name}')
-        json_data = github_api(url, HEADERS).json()
-        values = clean_orgs_data(json_data, CURRENT_TIME)
+        response = github_api(f'/orgs/{org_name}', HEADERS)
+        json = response.json()
+        values = create_org_dict(json, CURRENT_TIME)
         if values['name'] is None:  # name이 없을 경우 명시적으로 회사명 입력하기
             values['name'] = org_name
         data.append(values)
