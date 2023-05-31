@@ -67,3 +67,9 @@ VALUES
 %(stargazers_count)s, %(forks_count)s, %(open_issues_count)s, %(language)s, %(archived)s, %(disabled)s, %(license)s,
 %(allow_forking)s)
 """
+
+API_REPOS_LANGUAGES_TABLE_INSERT_SQL = """
+INSERT INTO adhoc.api_repos_languages (repo_full_name, language, usage_count, called_at)
+VALUES
+(%(repo_full_name)s, %(language)s, %(usage_count)s, %(called_at)s)
+"""
