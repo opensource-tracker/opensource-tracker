@@ -5,10 +5,11 @@ from api_calls.api_repos_licenses import collect_api_repos_licenses
 from api_calls.api_licenses import collect_api_licenses
 from api_calls.api_repos_commits import collect_api_repos_commits
 from api_calls.api_repos import collect_api_repos
+from api_calls.api_repos_languages import collect_api_repos_languages
 from dbkit.db_connector import psqlConnector
 from dbkit.queries import API_ORGS_TABLE_INSERT_SQL, API_LICENSES_TABLE_INSERT_SQL, \
 API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL, API_REPOS_COMMITS_TABLE_INSERT_SQL, \
-API_REPOS_TABLE_INSERT_SQL
+API_REPOS_TABLE_INSERT_SQL, API_REPOS_ISSUES_TABLE_INSERT_SQL
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -68,6 +69,11 @@ def run():
     issues_data = collect_api_repos_issues(HEADERS, CURRENT_TIME, repos)
     for values in issues_data:
         db.insert_data(API_REPOS_ISSUES_TABLE_INSERT_SQL, values)
+
+
+    repos_data = collect_api_repos(HEADERS, ORGS, CURRENT_TIME)
+    for values in repos_data:
+        db.insert_data(API_REPOS_TABLE_INSERT_SQL, values)
 
 
     db.disconnect()
