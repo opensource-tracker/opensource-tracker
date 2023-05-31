@@ -19,6 +19,7 @@ VALUES
 """
 
 API_REPOS_LICENSES_TABLE_INSERT_SQL = """
+INSERT INTO adhoc.api_repos_licenses
 (repo_full_name, license_key, sha, html_url, download_url, git_url, content, called_at)
 VALUES
 (%(repo_full_name)s, %(license_key)s, %(sha)s, %(html_url)s, %(download_url)s, %(git_url)s, %(content)s, %(called_at)s)
