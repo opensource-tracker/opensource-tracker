@@ -7,7 +7,7 @@ from dbkit.queries import *
 
 HEADERS = {
     'Accept': 'application/vnd.github+json',
-    'Authorization': f'Bearer {os.environ.get("GITHUB_TOKEN")}',
+    'Authorization': f'Bearer {os.environ.get("API_TOKEN")}',
     'X-GitHub-Api-Version': '2022-11-28'
 }
 
