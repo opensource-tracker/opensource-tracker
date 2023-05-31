@@ -27,5 +27,5 @@ VALUES
 """
 
 API_REPOS_SELECT_FULL_NAME_SQL = """
-SELECT (full_name) FROM adhoc.api_repos
+SELECT DISTINCT full_name FROM adhoc.api_repos
 """
