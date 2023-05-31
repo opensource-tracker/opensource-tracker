@@ -1,5 +1,6 @@
 from psycopg2.extras import execute_batch
 import psycopg2
+from psycopg2 import errors
 import os
 
 class psqlConnector:
@@ -29,9 +30,12 @@ class psqlConnector:
 
             print(">>> Successfully inserted data into table")
 
-        except psycopg2.Error as e:
-            self.conn.rollback()
-            print(f">>> failed insert data into table: {e}")
+        except (errors.UniqueViolation, psycopg2.Error) as e:
+            if isinstance(e, errors.UniqueViolation):
+                pass
+            else:
+                self.conn.rollback()
+                print(f">>> failed insert data into table: {e}")
 
         else:
             _cur.close()
@@ -44,9 +48,12 @@ class psqlConnector:
             _cur.close()
             print(">>> Successfully inserted data into table")
 
-        except psycopg2.Error as e:
-            self.conn.rollback()
-            print(f">>> failed insert data into table: {e}")
+        except (errors.UniqueViolation, psycopg2.Error) as e:
+            if isinstance(e, errors.UniqueViolation):
+                pass
+            else:
+                self.conn.rollback()
+                print(f">>> failed insert data into table: {e}")
 
     def update_date(self, data, attribute):
         pass
