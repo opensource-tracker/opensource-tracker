@@ -29,3 +29,14 @@ VALUES
 API_REPOS_SELECT_FULL_NAME_SQL = """
 SELECT DISTINCT full_name FROM adhoc.api_repos
 """
+
+
+API_REPOS_ISSUES_TABLE_INSERT_SQL = """
+INSERT INTO adhoc.api_repos_issues
+(repository_url, labels_url, comments_url, events_url, html_url, issues_id, node_id, number, title, state, locked, comments,
+created_at, updated_at, author_association, body, timeline_url, state_reason, login_user, called_at, repo_full_name)
+VALUES
+(%(repository_url)s, %(labels_url)s, %(comments_url)s, %(events_url)s, %(html_url)s, %(issues_id)s, %(node_id)s,
+%(number)s, %(title)s, %(state)s, %(locked)s, %(comments)s, %(created_at)s, %(updated_at)s, %(author_association)s, %(body)s,
+%(timeline_url)s, %(state_reason)s, %(login_user)s, %(called_at)s, %(repo_full_name)s)
+"""
