@@ -1,5 +1,6 @@
 from psycopg2.extras import execute_batch
 import psycopg2
+from psycopg2 import errors
 import os
 
 class psqlConnector:
@@ -29,6 +30,9 @@ class psqlConnector:
 
             print(">>> Successfully inserted data into table")
 
+        except errors.UniqueViolation as e:
+            pass # api_repos_commits의 sha col 중복 값 insert 방지
+
         except psycopg2.Error as e:
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
@@ -43,6 +47,9 @@ class psqlConnector:
             self.conn.commit()
             _cur.close()
             print(">>> Successfully inserted data into table")
+
+        except errors.UniqueViolation as e:
+            pass # api_repos_commits의 sha col 중복 값 insert 방지
 
         except psycopg2.Error as e:
             self.conn.rollback()

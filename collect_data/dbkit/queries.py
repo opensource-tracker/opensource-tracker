@@ -29,3 +29,18 @@ VALUES
 API_REPOS_SELECT_FULL_NAME_SQL = """
 SELECT DISTINCT full_name FROM adhoc.api_repos
 """
+
+API_REPOS_COMMITS_TABLE_INSERT_SQL = """
+INSERT INTO adhoc.api_repos_commits
+(sha, node_id, commit_author_name, commit_author_email, commit_author_date,
+commit_committer_name, commit_committer_email, commit_committer_date,
+commit_message, author_login, author_id, author_node_id, author_site_admin,
+committer_login, committer_id, committer_node_id, committer_site_admin,
+repo_full_name, called_at)
+VALUES
+(%(sha)s, %(node_id)s, %(commit_author_name)s, %(commit_author_email)s,
+%(commit_author_date)s, %(commit_committer_name)s, %(commit_committer_email)s,
+%(commit_committer_date)s, %(commit_message)s, %(author_login)s, %(author_id)s,
+%(author_node_id)s, %(author_site_admin)s, %(committer_login)s, %(committer_id)s,
+%(committer_node_id)s, %(committer_site_admin)s, %(repo_full_name)s, %(called_at)s);
+"""
