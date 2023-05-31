@@ -1,15 +1,12 @@
 from typing import List, Dict
-from collect_data.common import github_api
+from common import github_api
 
 def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) -> Dict:
-    """
-    """
-
     author_login = None
     author_id = None
     author_node_id = None
     author_site_admin = None
-    if 'author' in json.keys() and json['author'] is not None: # json에 author 키 자체가 없을 수도 있으므로 따로 처리
+    if 'author' in json and json['author'] is not None:
         if 'login' in json['author']:
             author_login = json['author']['login']
         if 'id' in json['author']:
@@ -23,7 +20,7 @@ def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) 
     committer_id = None
     committer_node_id = None
     committer_site_admin = None
-    if 'committer' in json.keys() and json['committer'] is not None: # json에 committer 키 자체가 없을 수도 있으므로 따로 처리
+    if 'committer' in json and json['committer'] is not None:
         if 'login' in json['committer']:
             committer_login = json['committer']['login']
         if 'id' in json['committer']:
@@ -59,6 +56,7 @@ def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) 
 def get_next_url(link_header):
     """
     This func returns the next url from Link Header.
+    If the next page is not exist, then return None. else return next page url.
     """
 
     links = link_header.split(',')
@@ -73,8 +71,11 @@ def get_next_url(link_header):
     return None
 
 
-def collect_api_commits(headers: Dict, repos: List[str], current_time: str) -> List[Dict]:
+def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str) -> List[Dict]:
     """
+    github_api 함수를 통해 받아온 response.headers에 접근해 Link 헤더를 받아오고 페이지네이션 하며
+    모든 커밋을 받아옵니다. 모든 커밋 정보를 create_repo_commit_dict에 넘기고, 받은 dict 값을 data에 이어 붙입니다.
+    이 과정을 모든 repo_full_name마다 반복하고 data list를 반환합니다.
     """
 
     data = []
@@ -85,7 +86,7 @@ def collect_api_commits(headers: Dict, repos: List[str], current_time: str) -> L
         url = f'https://api.github.com/repos/{repo}/commits?per_page=100'
         
         while True:
-            uri = url.split('https://api.github.com/')[1]
+            uri = url.split('https://api.github.com')[1]
             response = github_api(uri, headers)
 
             current_commits = response.json()
@@ -100,8 +101,9 @@ def collect_api_commits(headers: Dict, repos: List[str], current_time: str) -> L
                 page += 1
             else:
                 break
-
-        commit_dict = create_repo_commit_dict(current_commits, repo, current_time)
-        data.append(commit_dict)  
+        
+        for commit in commits:
+            commit_dict = create_repo_commit_dict(commit, repo, current_time)
+            data.append(commit_dict)
     
     return data

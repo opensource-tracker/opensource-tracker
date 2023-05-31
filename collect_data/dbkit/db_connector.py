@@ -30,12 +30,12 @@ class psqlConnector:
 
             print(">>> Successfully inserted data into table")
 
-        except errors.UniqueViolation as e:
-            pass # api_repos_commits의 sha col 중복 값 insert 방지
-
-        except psycopg2.Error as e:
-            self.conn.rollback()
-            print(f">>> failed insert data into table: {e}")
+        except (errors.UniqueViolation, psycopg2.Error) as e:
+            if isinstance(e, errors.UniqueViolation):
+                pass
+            else:
+                self.conn.rollback()
+                print(f">>> failed insert data into table: {e}")
 
         else:
             _cur.close()
@@ -48,12 +48,12 @@ class psqlConnector:
             _cur.close()
             print(">>> Successfully inserted data into table")
 
-        except errors.UniqueViolation as e:
-            pass # api_repos_commits의 sha col 중복 값 insert 방지
-
-        except psycopg2.Error as e:
-            self.conn.rollback()
-            print(f">>> failed insert data into table: {e}")
+        except (errors.UniqueViolation, psycopg2.Error) as e:
+            if isinstance(e, errors.UniqueViolation):
+                pass
+            else:
+                self.conn.rollback()
+                print(f">>> failed insert data into table: {e}")
 
     def update_date(self, data, attribute):
         pass
