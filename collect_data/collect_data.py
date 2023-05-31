@@ -34,7 +34,6 @@ def run():
 
     # repos: [(full_name,), (full_name,), ...]
     repos = db.select_data(API_REPOS_SELECT_FULL_NAME_SQL)
-    print(repos)
     repos = [repo[0] for repo in repos]
     repos_licenses_data = collect_api_repos_licenses(HEADERS, repos, CURRENT_TIME)
     for values in repos_licenses_data:
