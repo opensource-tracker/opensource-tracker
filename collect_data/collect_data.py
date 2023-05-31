@@ -2,7 +2,7 @@ import datetime
 import os
 from api_calls.api_orgs import collect_api_orgs
 from dbkit.db_connector import psqlConnector
-from dbkit.queries import *
+from dbkit.queries import API_ORGS_TABLE_INSERT_SQL
 
 
 HEADERS = {
