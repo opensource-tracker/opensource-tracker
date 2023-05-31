@@ -49,9 +49,9 @@ def save_info_to_commits_table(
     
     host = os.environ.get('DB_HOST')
     port = os.environ.get('DB_PORT')
-    database = os.environ.get('DB_DATABASE')
-    user = os.environ.get('DB_USER')
-    password = os.environ.get('DB_PASSWORD')
+    database = os.environ.get('DB_NAME')
+    user = os.environ.get('DB_USER_NAME')
+    password = os.environ.get('DB_USER_PASSWORD')
 
     conn = psycopg2.connect(
         host=host,
@@ -132,7 +132,7 @@ def collect_api_repos_commits(repo_full_name):
     """
 
     load_dotenv() # .env file load. in playground folder
-    access_token = os.environ.get('ACCESS_TOKEN')
+    access_token = os.environ.get('API_TOKEN')
 
     url = f'https://api.github.com/repos/{repo_full_name}/commits?per_page=100'
 
@@ -164,9 +164,9 @@ def collect_api_repos_commits(repo_full_name):
 
     host = os.environ.get('DB_HOST')
     port = os.environ.get('DB_PORT')
-    database = os.environ.get('DB_DATABASE')
-    user = os.environ.get('DB_USER')
-    password = os.environ.get('DB_PASSWORD')
+    database = os.environ.get('DB_NAME')
+    user = os.environ.get('DB_USER_NAME')
+    password = os.environ.get('DB_USER_PASSWORD')
 
     conn = psycopg2.connect(
         host=host,
