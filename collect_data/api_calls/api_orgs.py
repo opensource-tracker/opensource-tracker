@@ -1,20 +1,5 @@
 from yarl import URL
-import requests
-
-
-def get_json(url, HEADERS):
-    """
-    url로 api 요청을 보내고, 응답값을 json 형태로 반환하는 함수입니다.
-
-    Args:
-        url (str): 요청을 보낼 url 주소
-
-    Returns:
-        dict or list(dict)
-    """
-    req = requests.get(url, headers=HEADERS)
-    return req.json()
-
+from collect_data.common import github_api
 
 def clean_orgs_data(repo_content, CURRENT_TIME):
     """
@@ -62,7 +47,7 @@ def collect_api_orgs(HEADERS, ORGS, CURRENT_TIME):
     data = []
     for org_name in ORGS:
         url = URL('https://api.github.com').with_path(f'orgs/{org_name}')
-        json_data = get_json(url, HEADERS)
+        json_data = github_api(url, HEADERS).json()
         values = clean_orgs_data(json_data, CURRENT_TIME)
         if values['name'] is None:  # name이 없을 경우 명시적으로 회사명 입력하기
             values['name'] = org_name

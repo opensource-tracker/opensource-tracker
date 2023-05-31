@@ -37,7 +37,7 @@ def github_api(uri, github_token):
     res = requests.get(url, headers=headers)
     if res.status_code != 200: # TODO: status_code에 맞춰서 raise Error type 변경
         raise ValueError()
-    return res.json()
+    return res
 
 def create_repo_license_dict(repo_full_name, json):
     return {

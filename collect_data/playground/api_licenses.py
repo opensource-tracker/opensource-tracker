@@ -27,7 +27,7 @@ def github_api(uri, github_token):
         'X-GitHub-Api-Version': '2022-11-28',
     }
     res = requests.get(url, headers=headers)
-    return res.json()
+    return res
 
 def execute_insert_license(cursor, license_dict):
     insert_query = """
