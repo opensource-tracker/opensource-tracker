@@ -1,7 +1,9 @@
 from psycopg2.extras import execute_batch
 import psycopg2
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class psqlConnector:
     def __init__(self):
