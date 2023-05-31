@@ -3,11 +3,15 @@ import os
 from api_calls.api_orgs import collect_api_orgs
 from dbkit.db_connector import psqlConnector
 from dbkit.queries import *
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 
 HEADERS = {
     'Accept': 'application/vnd.github+json',
-    'Authorization': f'Bearer {os.environ.get("GITHUB_TOKEN")}',
+    'Authorization': f'Bearer {os.environ.get("API_TOKEN")}',
     'X-GitHub-Api-Version': '2022-11-28'
 }
 
@@ -35,6 +39,8 @@ def run():
     for values in orgs_data:
         db.insert_data(API_ORGS_TABLE_INSERT_SQL, values)
     db.disconnect()
+
+
 
 
 if __name__ == "__main__":

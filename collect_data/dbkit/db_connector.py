@@ -2,15 +2,14 @@ from psycopg2.extras import execute_batch
 import psycopg2
 import os
 
-
 class psqlConnector:
     def __init__(self):
         self.conn = psycopg2.connect(
-            host=os.environ.get('HOST'),
-            dbname=os.environ.get('DATABASE'),
-            user=os.environ.get('USER'),
-            password=os.environ.get('PASSWORD'),
-            port=os.environ.get('DBPORT')
+            host=os.environ.get('DB_HOST'),
+            dbname=os.environ.get('DB_NAME'),
+            user=os.environ.get('DB_USER_NAME'),
+            password=os.environ.get('DB_USER_PASSWORD'),
+            port=os.environ.get('DB_PORT')
         )
 
     def _database(self):
