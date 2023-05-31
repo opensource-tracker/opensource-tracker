@@ -3,9 +3,10 @@ import os
 from api_calls.api_orgs import collect_api_orgs
 from api_calls.api_repos_licenses import collect_api_repos_licenses
 from api_calls.api_licenses import collect_api_licenses
+from api_calls.api_repos_commits import collect_api_repos_commits
 from dbkit.db_connector import psqlConnector
 from dbkit.queries import API_ORGS_TABLE_INSERT_SQL, API_LICENSES_TABLE_INSERT_SQL, \
-    API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL
+    API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL, API_REPOS_COMMITS_TABLE_INSERT_SQL
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,9 +37,15 @@ def run():
     repos = db.select_data(API_REPOS_SELECT_FULL_NAME_SQL)
     print(repos)
     repos = [repo[0] for repo in repos]
+
     repos_licenses_data = collect_api_repos_licenses(HEADERS, repos, CURRENT_TIME)
+    repos_commits_data = collect_api_repos_commits(HEADERS, repos, CURRENT_TIME)
+    
     for values in repos_licenses_data:
         db.insert_data(API_REPOS_LICENSES_TABLE_INSERT_SQL, values)
+
+    for values in repos_commits_data:
+        db.insert_data(API_REPOS_COMMITS_TABLE_INSERT_SQL, values)
 
     # licenses는 데이터 갱신이 필요 없어서 중복된 값은 예외처리 하겠습니다.
     licenses_data = collect_api_licenses(HEADERS, LICENSES, CURRENT_TIME)
