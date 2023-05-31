@@ -30,7 +30,6 @@ API_REPOS_SELECT_FULL_NAME_SQL = """
 SELECT DISTINCT full_name FROM adhoc.api_repos
 """
 
-<<<<<<< HEAD
 
 API_REPOS_ISSUES_TABLE_INSERT_SQL = """
 INSERT INTO adhoc.api_repos_issues
@@ -41,7 +40,7 @@ VALUES
 %(number)s, %(title)s, %(state)s, %(locked)s, %(comments)s, %(created_at)s, %(updated_at)s, %(author_association)s, %(body)s,
 %(timeline_url)s, %(state_reason)s, %(login_user)s, %(called_at)s, %(repo_full_name)s)
 """
-=======
+
 API_REPOS_COMMITS_TABLE_INSERT_SQL = """
 INSERT INTO adhoc.api_repos_commits
 (sha, node_id, commit_author_name, commit_author_email, commit_author_date,
@@ -67,4 +66,3 @@ VALUES
 %(stargazers_count)s, %(forks_count)s, %(open_issues_count)s, %(language)s, %(archived)s, %(disabled)s, %(license)s, \
 %(allow_forking)s)
 """
->>>>>>> b173d597d7f832eeb8705f1cb5da8bd518326e56
