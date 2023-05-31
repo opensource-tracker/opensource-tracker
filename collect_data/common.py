@@ -1,7 +1,7 @@
 from typing import Dict
 import requests
 
-def github_api(uri: str, headers: Dict):
+def github_api(uri: str, headers: Dict) -> requests.Response:
     """
     uri를 기반으로 GitHub API를 보내고 응답을 반환합니다.
     Args:
@@ -24,7 +24,9 @@ def github_api(uri: str, headers: Dict):
     """
     url = f'https://api.github.com{uri}'
     response = requests.get(url, headers=headers)
-    if response.status_code != 200: # TODO: status_code에 맞게 Error 사용ㅓ
-        raise ValueError
-    else:
+    if response.status_code == 200:
         return response
+    elif response.status_code == 404:
+        raise ValueError(f'{uri} Not Found')
+    else:
+        raise Exception(f'Something goes wrong with {uri}, status code: {response.status_code}')
