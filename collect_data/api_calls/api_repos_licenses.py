@@ -38,7 +38,7 @@ def collect_api_repos_licenses(headers: Dict, repos: List[str], current_time: st
     """
     data = []
     for repo in repos:
-        json = github_api(f'/repos/{repo}/license', headers)
+        json = github_api(f'/repos/{repo}/license', headers).json()
         license_dict = create_repo_license_dict(json, repo, current_time)
         data.append(license_dict)
     return data

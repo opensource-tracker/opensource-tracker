@@ -50,12 +50,12 @@ def execute_insert_license(cursor, license_dict):
     ])
 
 if __name__ == '__main__':
-    res = github_api('/licenses', github_token)
+    res = github_api('/licenses', github_token).json()
 
     with conn:
         with conn.cursor() as cursor:
             for license in res:
                 key = license["key"]
                 print(f'for {key}...')
-                license_dict = github_api(f'/licenses/{key}', github_token)
+                license_dict = github_api(f'/licenses/{key}', github_token).json()
                 execute_insert_license(cursor, license_dict)

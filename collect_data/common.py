@@ -20,11 +20,11 @@ def github_api(uri: str, headers: Dict) -> Dict:
             'Authorization': 'Bearer ' + <github_access_token>,
             'X-GitHub-Api-Version': '2022-11-28',
         }
-        data = github_api('/repos/owner/repo', headers)
+        data = github_api('/repos/owner/repo', headers).json()
     """
     url = f'https://api.github.com{uri}'
     req = requests.get(url, headers=headers)
-    if req.status_code != 200: # TODO: status_code에 맞게 Error 사용ㅓ
+    if req.status_code != 200: # TODO: status_code에 맞게 Error 사용
         raise ValueError
     else:
-        return req.json()
+        return req

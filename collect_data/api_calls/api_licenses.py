@@ -40,7 +40,7 @@ def collect_api_licenses(headers: Dict, licenses: List[str], current_time: str) 
     """
     data = []
     for license in licenses:
-        json = github_api(f'/licenses/{license}', headers)
+        json = github_api(f'/licenses/{license}', headers).json()
         license_dict = create_license_dict(json, current_time)
         data.append(license_dict)
     return data
