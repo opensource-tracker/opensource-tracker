@@ -1,3 +1,6 @@
+"""
+adhoc.api_licenses에 API 정보를 적재하는 예시 코드 조각입니다
+"""
 from dotenv import load_dotenv
 from datetime import datetime
 import psycopg2
@@ -24,8 +27,6 @@ def github_api(uri, github_token):
         'X-GitHub-Api-Version': '2022-11-28',
     }
     res = requests.get(url, headers=headers)
-    if res.status_code != 200:
-        raise Exception(f"status code is not 200 for {license_key}")
     return res.json()
 
 def execute_insert_license(cursor, license_dict):
