@@ -3,9 +3,10 @@ import os
 from api_calls.api_orgs import collect_api_orgs
 from api_calls.api_repos_licenses import collect_api_repos_licenses
 from api_calls.api_licenses import collect_api_licenses
+from api_calls.api_repos_issues import collect_api_repos_issues
 from dbkit.db_connector import psqlConnector
 from dbkit.queries import API_ORGS_TABLE_INSERT_SQL, API_LICENSES_TABLE_INSERT_SQL, \
-    API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL
+    API_REPOS_LICENSES_TABLE_INSERT_SQL, API_REPOS_SELECT_FULL_NAME_SQL, API_REPOS_ISSUES_TABLE_INSERT_SQL
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -43,6 +44,13 @@ def run():
     licenses_data = collect_api_licenses(HEADERS, LICENSES, CURRENT_TIME)
     for values in licenses_data:
         db.insert_data(API_LICENSES_TABLE_INSERT_SQL, values)
+
+
+    # issues 데이터 처리
+    issues_data = collect_api_repos_issues(HEADERS, CURRENT_TIME, repos)
+    for values in issues_data:
+        db.insert_data(API_REPOS_ISSUES_TABLE_INSERT_SQL, values)
+
 
     db.disconnect()
 
