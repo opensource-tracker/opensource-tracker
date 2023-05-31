@@ -29,7 +29,9 @@ def get_current_time():
 
 def run():
     db = psqlConnector()
-    orgs_data = collect_api_orgs(HEADERS, ORGS, get_current_time())
+    CURRENT_TIME = get_current_time()
+
+    orgs_data = collect_api_orgs(HEADERS, ORGS, CURRENT_TIME)
     for values in orgs_data:
         db.insert_data(API_ORGS_TABLE_INSERT_SQL, values)
     db.disconnect()
