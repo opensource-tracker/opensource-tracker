@@ -1,5 +1,5 @@
-CREATE TABLE raw_data.api_licenses (
-  key         VARCHAR(255) NOT NULL,
+CREATE TABLE adhoc.api_licenses (
+  key         VARCHAR(255) NOT NULL PRIMARY KEY,
   name        VARCHAR(255) NOT NULL,
   spdx_id     VARCHAR(255) NOT NULL,
   node_id     VARCHAR(255) NOT NULL,
