@@ -1,4 +1,3 @@
-from common import github_api
 from typing import Dict
 import requests
 
