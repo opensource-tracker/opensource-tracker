@@ -8,7 +8,7 @@
 - 프로그래머스 데이터엔지니어링 데브코스 1기
 - 2차 프로젝트 1팀 1조
 
-| 김민석 | 서대원 | 안수빈 | 이수영 | 정희원 |
+| **김민석** | **서대원** | **안수빈** | **이수영** | **정희원** |
 |:---:|:---:|:---:|:---:|:---:|
 | ![kmus1232](https://github.com/kmus1232.png) | ![DaewonSeo](https://github.com/DaewonSeo.png) | ![nyeong](https://github.com/nyeong.png) | ![jeslsy](https://github.com/jeslsy.png) | ![heewoneha](https://github.com/heewoneha.png) |
 
@@ -20,7 +20,7 @@
 ## Tech Stack
 
 | Field | Stack |
-|:---:|:---:|
+|:---:|:---|
 | Language | <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white"/> |
 | Data Base | <img src="https://img.shields.io/badge/Amazon RDS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"/> <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white"/>  |
 | Dashboard | <img src="https://img.shields.io/badge/Preset-04B404?style=for-the-badge&logo=preset&logoColor=white"/> |
