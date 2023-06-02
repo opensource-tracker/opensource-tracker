@@ -60,12 +60,16 @@ def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str
     """
 
     data = []
+    commits = []
 
     for repo in repos:
         uri = f'/repos/{repo}/commits?per_page=30'
         response = github_api(uri, headers)
         current_commits = response.json()
-        commit_dict = create_repo_commit_dict(current_commits, repo, current_time)
+        commits.extend(current_commits)
+
+    for commit in commits:
+        commit_dict = create_repo_commit_dict(commit, repo, current_time)
         data.append(commit_dict)
     
     return data
