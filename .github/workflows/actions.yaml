@@ -5,7 +5,7 @@ on:
     - cron: "0 16 * * *" # UTC 기준으로 매일 16시 -> 한국 시간 새벽 1시
 
 jobs:
-  build:
+  collect:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
