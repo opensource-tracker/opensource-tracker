@@ -1,6 +1,7 @@
 from typing import List, Dict
 from common import github_api
 
+
 def create_repo_license_dict(json: Dict, repo_full_name: str, current_time: str) -> Dict:
     return {
         'repo_full_name': repo_full_name,
@@ -11,7 +12,8 @@ def create_repo_license_dict(json: Dict, repo_full_name: str, current_time: str)
         'git_url': json['git_url'],
         'content': json['content'],
         'called_at': current_time
-  }
+    }
+
 
 def collect_api_repos_licenses(headers: Dict, repos: List[str], current_time: str) -> List[Dict]:
     """
@@ -38,8 +40,11 @@ def collect_api_repos_licenses(headers: Dict, repos: List[str], current_time: st
     """
     data = []
     for repo in repos:
-        response = github_api(f'/repos/{repo}/license', headers)
-        json = response.json()
-        license_dict = create_repo_license_dict(json, repo, current_time)
-        data.append(license_dict)
+        try:
+            response = github_api(f'/repos/{repo}/license', headers)
+            json = response.json()
+            license_dict = create_repo_license_dict(json, repo, current_time)
+            data.append(license_dict)
+        except ValueError:
+            print(f"There is no licenses on {repo}")
     return data
