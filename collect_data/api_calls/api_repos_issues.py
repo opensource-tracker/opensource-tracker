@@ -41,7 +41,11 @@ def collect_api_repos_issues(HEADERS, repos, CURRENT_TIME):
     for repo in repos:
         url = f'https://api.github.com/repos/{repo}/issues'
         issues = []
-        params = {'page': 1}
+        default_params = {
+            'state': 'all',
+            'filter': 'all',
+        }
+        params = dict(default_params, **{'page': 1})
 
         # pagenation
         while True:
@@ -51,7 +55,7 @@ def collect_api_repos_issues(HEADERS, repos, CURRENT_TIME):
                 issues.extend(json_data)
                 if 'next' in response.links:
                     url = response.links['next']['url']
-                    params = {}
+                    params = default_params
                 else:
                     break
             else:
