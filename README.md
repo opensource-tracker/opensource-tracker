@@ -1,6 +1,6 @@
 # Opensource tracker
 
-국내 기업의 오픈소스 현황을 대시보드로 보여줍니다.
+[GitHub REST API](https://docs.github.com/ko/rest?apiVersion=v3)를 활용하여 국내 기업의 오픈소스 현황을 대시보드로 보여줍니다.
 
 ## Team
 
