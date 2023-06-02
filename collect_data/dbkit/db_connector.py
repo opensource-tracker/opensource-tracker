@@ -30,8 +30,8 @@ class psqlConnector:
 
             print(">>> Successfully inserted data into table")
 
-        except errors.UniqueViolation:
-            pass # api_repos_commits_sha 중복 값 처리
+        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
+            self.conn.rollback()
         except psycopg2.Error as e:
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
@@ -47,9 +47,8 @@ class psqlConnector:
             _cur.close()
             print(">>> Successfully inserted data into table")
 
-        except errors.UniqueViolation:
-            pass # api_repos_commits_sha 중복 값 처리
-
+        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
+            self.conn.rollback()
         except psycopg2.Error as e:
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
