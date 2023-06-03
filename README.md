@@ -19,13 +19,13 @@
 
 ### 1. For all organizations
 
-![for all orgs](https://github.com/heewoneha/reflections/assets/74031620/797f3c39-e984-4d54-9f3a-b69ea4a2c692)
+![for all orgs](https://github.com/opensource-tracker/opensource-tracker/assets/74031620/ed9fcc85-6d20-4a5a-b5b4-70a43a10dc0e)
 
 ### 2. For each organization
-![for each organization](https://github.com/heewoneha/reflections/assets/74031620/e9aadfd6-448e-4969-a5e1-c42cc1a9a5b6)
+![for each organization](https://github.com/opensource-tracker/opensource-tracker/assets/74031620/76d08f0f-ea1b-443d-aa05-5717bce57aa8)
 
 ### 3. For each repository
-![for-each-repository](https://github.com/heewoneha/heewoneha.github.io/assets/74031620/ba1cdb79-ce5b-4533-876f-25bec7c09173)
+![for-each-repository](https://github.com/opensource-tracker/opensource-tracker/assets/74031620/a04eecaa-6a8a-45e1-819f-b04cc6888656)
 
 
 ## Tech Stack
