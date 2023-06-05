@@ -1,5 +1,6 @@
 from typing import List, Dict
 from common import github_api
+import requests
 
 def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) -> Dict:
     author_login = None
@@ -60,16 +61,19 @@ def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str
     """
 
     data = []
-    commits = []
 
     for repo in repos:
         uri = f'/repos/{repo}/commits?per_page=30'
-        response = github_api(uri, headers)
-        current_commits = response.json()
-        commits.extend(current_commits)
 
-    for commit in commits:
-        commit_dict = create_repo_commit_dict(commit, repo, current_time)
-        data.append(commit_dict)
+        try:
+            response = github_api(uri, headers)
+        except requests.exceptions.HTTPError as e:
+            print(f'Error: {e}')
+        else:
+            current_commits = response.json()
+
+        for commit in current_commits:
+            commit_dict = create_repo_commit_dict(commit, repo, current_time)
+            data.append(commit_dict)
     
     return data

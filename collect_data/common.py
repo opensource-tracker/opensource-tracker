@@ -31,5 +31,7 @@ def github_api(uri: str, headers: Dict, params:Optional[Dict] = None) -> request
         return response
     elif response.status_code == 404:
         raise ValueError(f'{uri} Not Found')
+    elif response.status_code == 409:
+        raise requests.exceptions.HTTPError("cannot get empty repository's commits")
     else:
         raise Exception(f'Something goes wrong with {uri}, status code: {response.status_code}')
