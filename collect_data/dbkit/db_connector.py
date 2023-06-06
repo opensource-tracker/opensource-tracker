@@ -30,14 +30,13 @@ class psqlConnector:
 
             print(">>> Successfully inserted data into table")
 
-        except (errors.UniqueViolation, psycopg2.Error) as e:
-            if isinstance(e, errors.UniqueViolation):
-                pass
-            else:
-                self.conn.rollback()
-                print(f">>> failed insert data into table: {e}")
-
-        else:
+        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
+            self.conn.rollback()
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            print(f">>> failed insert data into table: {e}")
+        
+        finally:
             _cur.close()
 
     def insert_bulk_data(self, query, values):  # 해당 함수는 좀 더 보완이 필요함
@@ -48,12 +47,14 @@ class psqlConnector:
             _cur.close()
             print(">>> Successfully inserted data into table")
 
-        except (errors.UniqueViolation, psycopg2.Error) as e:
-            if isinstance(e, errors.UniqueViolation):
-                pass
-            else:
-                self.conn.rollback()
-                print(f">>> failed insert data into table: {e}")
+        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
+            self.conn.rollback()
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            print(f">>> failed insert data into table: {e}")
+
+        finally:
+            _cur.close()
 
     def update_date(self, data, attribute):
         pass

@@ -32,11 +32,19 @@ def create_repo_dict(json: Dict, CURRENT_TIME):
 
 def collect_api_repos(HEADERS: Dict, ORGS: List, CURRENT_TIME) -> List[Dict]:
     data = []
+    params = {
+        "per_page": 100,
+    }
 
     for org in ORGS:
-        response = github_api(f'/orgs/{org}/repos', HEADERS)
-        repos_json = response.json()
-        for repo_json in repos_json:
-            data.append(create_repo_dict(repo_json, CURRENT_TIME))
+        params['page'] = 1
+        while True:
+            response = github_api(f'/orgs/{org}/repos', HEADERS, params)
+            repos_json: List = response.json()
+            if len(repos_json) == 0:
+                break
+            for repo_json in repos_json:
+                data.append(create_repo_dict(repo_json, CURRENT_TIME))
+            params['page'] += 1
 
     return data

@@ -1,5 +1,6 @@
 from typing import List, Dict
 from common import github_api
+import requests
 
 def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) -> Dict:
     author_login = None
@@ -53,56 +54,25 @@ def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) 
     }
 
 
-def get_next_url(link_header):
-    """
-    This func returns the next url from Link Header.
-    If the next page is not exist, then return None. else return next page url.
-    """
-
-    links = link_header.split(',')
-
-    for link in links:
-        parts = link.split(';')
-
-        if len(parts) == 2 and 'rel="next"' in parts[1]:
-            url = parts[0].strip('<>')
-            return url
-
-    return None
-
-
 def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str) -> List[Dict]:
     """
-    github_api 함수를 통해 받아온 response.headers에 접근해 Link 헤더를 받아오고 페이지네이션 하며
-    모든 커밋을 받아옵니다. 모든 커밋 정보를 create_repo_commit_dict에 넘기고, 받은 dict 값을 data에 이어 붙입니다.
-    이 과정을 모든 repo_full_name마다 반복하고 data list를 반환합니다.
+    github_api 함수를 통해 받아온 response.json() 에 접근해 페이지네이션 하지 않고 최근 커밋을 30개 받아옵니다.
+    모든 repo에서 조회한 commit dicts를 리스트로 반환합니다.
     """
 
     data = []
 
     for repo in repos:
-        commits = []
-        page = 1
-        url = f'https://api.github.com/repos/{repo}/commits?per_page=100'
-        
-        while True:
-            uri = url.split('https://api.github.com')[1]
+        uri = f'/repos/{repo}/commits?per_page=30'
+
+        try:
             response = github_api(uri, headers)
-
+        except requests.exceptions.HTTPError as e:
+            print(f'Error: {e}')
+        else:
             current_commits = response.json()
-            commits.extend(current_commits)
 
-            # In 'Link' header, get next page's URL
-            link_header = response.headers.get('Link', '')
-            next_url = get_next_url(link_header)
-
-            if next_url:
-                url = next_url
-                page += 1
-            else:
-                break
-        
-        for commit in commits:
+        for commit in current_commits:
             commit_dict = create_repo_commit_dict(commit, repo, current_time)
             data.append(commit_dict)
     

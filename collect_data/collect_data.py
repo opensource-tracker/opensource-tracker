@@ -37,6 +37,12 @@ def run():
     for values in orgs_data:
         db.insert_data(API_ORGS_TABLE_INSERT_SQL, values)
 
+
+    repos_data = collect_api_repos(HEADERS, ORGS, CURRENT_TIME)
+    for values in repos_data:
+        db.insert_data(API_REPOS_TABLE_INSERT_SQL, values)
+
+
     # repos: [(full_name,), (full_name,), ...]
     repos = db.select_data(API_REPOS_SELECT_FULL_NAME_SQL)
     repos = [repo[0] for repo in repos]
@@ -62,11 +68,6 @@ def run():
     issues_data = collect_api_repos_issues(HEADERS, repos, CURRENT_TIME)
     for values in issues_data:
         db.insert_data(API_REPOS_ISSUES_TABLE_INSERT_SQL, values)
-
-
-    repos_data = collect_api_repos(HEADERS, ORGS, CURRENT_TIME)
-    for values in repos_data:
-        db.insert_data(API_REPOS_TABLE_INSERT_SQL, values)
 
 
     repos_languages_data = collect_api_repos_languages(HEADERS, repos, CURRENT_TIME)
