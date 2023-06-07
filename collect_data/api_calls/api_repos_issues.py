@@ -48,11 +48,10 @@ def collect_api_repos_issues(HEADERS, repos, CURRENT_TIME):
         params['state'] = 'all'
         params['filter'] = 'all'
         while True:
-            response = github_api(f'/repos/{repo}/issues', HEADERS, params)
-            if response.status_code != 200:
-                print('API 요청이 실패하였습니다.')
-                print('응답 상태 코드:', response.status_code)
-                break
+            try:
+                response = github_api(f'/repos/{repo}/issues', HEADERS, params)
+            except requests.exceptions.RequestException as e:
+                print(f'Error: {e}')
 
             issues_json = response.json()
             if len(issues_json) == 0:

@@ -33,14 +33,14 @@ def run():
     db = psqlConnector()
     CURRENT_TIME = datetime.datetime.now()
 
-    #orgs_data = collect_api_orgs(HEADERS, ORGS, CURRENT_TIME)
-    #for values in orgs_data:
-    #    db.insert_data(API_ORGS_TABLE_INSERT_SQL, values)
+    orgs_data = collect_api_orgs(HEADERS, ORGS, CURRENT_TIME)
+    for values in orgs_data:
+        db.insert_data(API_ORGS_TABLE_INSERT_SQL, values)
 
 
-    #repos_data = collect_api_repos(HEADERS, ORGS, CURRENT_TIME)
-    #for values in repos_data:
-    #    db.insert_data(API_REPOS_TABLE_INSERT_SQL, values)
+    repos_data = collect_api_repos(HEADERS, ORGS, CURRENT_TIME)
+    for values in repos_data:
+        db.insert_data(API_REPOS_TABLE_INSERT_SQL, values)
 
 
     # repos: [(full_name,), (full_name,), ...]
@@ -48,31 +48,31 @@ def run():
     repos = [repo[0] for repo in repos]
 
 
-    #repos_licenses_data = collect_api_repos_licenses(HEADERS, repos, CURRENT_TIME)
-    #for values in repos_licenses_data:
-    #    db.insert_data(API_REPOS_LICENSES_TABLE_INSERT_SQL, values)
+    repos_licenses_data = collect_api_repos_licenses(HEADERS, repos, CURRENT_TIME)
+    for values in repos_licenses_data:
+        db.insert_data(API_REPOS_LICENSES_TABLE_INSERT_SQL, values)
 
 
-    #repos_commits_data = collect_api_repos_commits(HEADERS, repos, CURRENT_TIME)
-    #for values in repos_commits_data:
-    #    db.insert_data(API_REPOS_COMMITS_TABLE_INSERT_SQL, values)
+    repos_commits_data = collect_api_repos_commits(HEADERS, repos, CURRENT_TIME)
+    for values in repos_commits_data:
+        db.insert_data(API_REPOS_COMMITS_TABLE_INSERT_SQL, values)
 
 
     # licenses는 데이터 갱신이 필요 없어서 중복된 값은 예외처리 하겠습니다.
-    #licenses_data = collect_api_licenses(HEADERS, LICENSES, CURRENT_TIME)
-    #for values in licenses_data:
-    #    db.insert_data(API_LICENSES_TABLE_INSERT_SQL, values)
+    licenses_data = collect_api_licenses(HEADERS, LICENSES, CURRENT_TIME)
+    for values in licenses_data:
+        db.insert_data(API_LICENSES_TABLE_INSERT_SQL, values)
 
 
-    # issues 데이터 처리
+
     issues_data = collect_api_repos_issues(HEADERS, repos, CURRENT_TIME)
     for values in issues_data:
         db.insert_data(API_REPOS_ISSUES_TABLE_INSERT_SQL, values)
 
 
-    #repos_languages_data = collect_api_repos_languages(HEADERS, repos, CURRENT_TIME)
-    #for values in repos_languages_data:
-    #    db.insert_data(API_REPOS_LANGUAGES_TABLE_INSERT_SQL, values)
+    repos_languages_data = collect_api_repos_languages(HEADERS, repos, CURRENT_TIME)
+    for values in repos_languages_data:
+        db.insert_data(API_REPOS_LANGUAGES_TABLE_INSERT_SQL, values)
 
 
     db.disconnect()
