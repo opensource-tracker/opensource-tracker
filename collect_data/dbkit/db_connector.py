@@ -1,5 +1,6 @@
 from psycopg2.extras import execute_batch
 import psycopg2
+from psycopg2 import errors
 import os
 
 class psqlConnector:
@@ -16,8 +17,10 @@ class psqlConnector:
         self.cur = self.conn.cursor()
         return self.cur
 
-    def select_data(self):
-        pass
+    def select_data(self, query):
+        _cur = self._database()
+        _cur.execute(query)
+        return _cur.fetchall()
 
     def insert_data(self, query, values):
         _cur = self._database()
@@ -27,11 +30,13 @@ class psqlConnector:
 
             print(">>> Successfully inserted data into table")
 
+        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
+            self.conn.rollback()
         except psycopg2.Error as e:
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
-
-        else:
+        
+        finally:
             _cur.close()
 
     def insert_bulk_data(self, query, values):  # 해당 함수는 좀 더 보완이 필요함
@@ -42,9 +47,14 @@ class psqlConnector:
             _cur.close()
             print(">>> Successfully inserted data into table")
 
+        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
+            self.conn.rollback()
         except psycopg2.Error as e:
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
+
+        finally:
+            _cur.close()
 
     def update_date(self, data, attribute):
         pass
