@@ -13,6 +13,7 @@ parso==0.8.3
 platformdirs==3.5.1
 pluggy==1.0.0
 psycopg2-binary==2.9.6
+python-dotenv==1.0.0
 requests==2.31.0
 ruff==0.0.270
 tomli==2.0.1
