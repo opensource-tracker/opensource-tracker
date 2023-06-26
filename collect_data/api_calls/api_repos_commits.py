@@ -1,8 +1,9 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from common import github_api
 import requests
 
-def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) -> Dict:
+
+def create_repo_commit_values(json: Dict, repo_full_name: str, current_time: str) -> Tuple:
     author_login = None
     author_id = None
     author_node_id = None
@@ -31,33 +32,33 @@ def create_repo_commit_dict(json: Dict, repo_full_name: str, current_time: str) 
         if 'site_admin' in json['committer']:
             committer_site_admin = json['committer']['site_admin']
 
-    return {
-        'sha': json['sha'],
-        'node_id': json['node_id'],
-        'commit_author_name': json['commit']['author']['name'],
-        'commit_author_email': json['commit']['author']['email'],
-        'commit_author_date': json['commit']['author']['date'],
-        'commit_committer_name': json['commit']['committer']['name'],
-        'commit_committer_email': json['commit']['committer']['email'],
-        'commit_committer_date': json['commit']['committer']['date'],
-        'commit_message': json['commit']['message'],
-        'author_login': author_login,
-        'author_id': author_id,
-        'author_node_id': author_node_id,
-        'author_site_admin': author_site_admin,
-        'committer_login': committer_login,
-        'committer_id': committer_id,
-        'committer_node_id': committer_node_id,
-        'committer_site_admin': committer_site_admin,
-        'repo_full_name': repo_full_name,
-        'called_at': current_time
-    }
+    return (
+        json['sha'],
+        json['node_id'],
+        json['commit']['author']['name'],
+        json['commit']['author']['email'],
+        json['commit']['author']['date'],
+        json['commit']['committer']['name'],
+        json['commit']['committer']['email'],
+        json['commit']['committer']['date'],
+        json['commit']['message'],
+        author_login,
+        author_id,
+        author_node_id,
+        author_site_admin,
+        committer_login,
+        committer_id,
+        committer_node_id,
+        committer_site_admin,
+        repo_full_name,
+        current_time
+    )
 
 
-def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str) -> List[Dict]:
+def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str) -> List[Tuple]:
     """
     github_api 함수를 통해 받아온 response.json() 에 접근해 페이지네이션 하지 않고 최근 커밋을 30개 받아옵니다.
-    모든 repo에서 조회한 commit dicts를 리스트로 반환합니다.
+    모든 repo에서 조회한 commit tuple를 리스트로 반환합니다.
     """
 
     data = []
@@ -73,7 +74,8 @@ def collect_api_repos_commits(headers: Dict, repos: List[str], current_time: str
             current_commits = response.json()
 
         for commit in current_commits:
-            commit_dict = create_repo_commit_dict(commit, repo, current_time)
-            data.append(commit_dict)
-    
+            commit_values = create_repo_commit_values(
+                commit, repo, current_time)
+            data.append(commit_values)
+
     return data
