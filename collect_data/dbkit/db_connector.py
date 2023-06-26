@@ -1,7 +1,8 @@
-from psycopg2.extras import execute_batch
+from psycopg2.extras import execute_values
 import psycopg2
 from psycopg2 import errors
 import os
+
 
 class psqlConnector:
     def __init__(self):
@@ -25,30 +26,13 @@ class psqlConnector:
     def insert_data(self, query, values):
         _cur = self._database()
         try:
-            _cur.execute(query, values)
+            execute_values(_cur, query, values)
             self.conn.commit()
 
-            print(">>> Successfully inserted data into table")
-
-        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
-            self.conn.rollback()
-        except psycopg2.Error as e:
+        except errors.UniqueViolation as e:  # api_repos_commits_sha 중복 값 처리
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
-        
-        finally:
-            _cur.close()
 
-    def insert_bulk_data(self, query, values):  # 해당 함수는 좀 더 보완이 필요함
-        _cur = self._database()
-        try:
-            execute_batch(_cur, query, values)
-            self.conn.commit()
-            _cur.close()
-            print(">>> Successfully inserted data into table")
-
-        except errors.UniqueViolation: # api_repos_commits_sha 중복 값 처리
-            self.conn.rollback()
         except psycopg2.Error as e:
             self.conn.rollback()
             print(f">>> failed insert data into table: {e}")
