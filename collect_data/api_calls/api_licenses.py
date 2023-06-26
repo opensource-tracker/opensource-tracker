@@ -1,21 +1,23 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from common import github_api
 
-def create_license_dict(json: Dict, current_time: str) -> Dict:
-    return {
-        'key': json['key'],
-        'name': json['name'],
-        'spdx_id': json['spdx_id'],
-        'node_id': json['node_id'],
-        'url': json['url'],
-        'body': json['body'],
-        'permissions': json['permissions'],
-        'conditions': json['conditions'],
-        'limitations': json['limitations'],
-        'called_at': current_time
-    }
 
-def collect_api_licenses(headers: Dict, licenses: List[str], current_time: str) -> List[Dict]:
+def create_license_values(json: Dict, current_time: str) -> Tuple:
+    return (
+        json['key'],
+        json['name'],
+        json['spdx_id'],
+        json['node_id'],
+        json['url'],
+        json['body'],
+        json['permissions'],
+        json['conditions'],
+        json['limitations'],
+        current_time
+    )
+
+
+def collect_api_licenses(headers: Dict, licenses: List[str], current_time: str) -> List[Tuple]:
     """
     라이센스 키 목록을 받아 GitHub API를 활용하여 그 정보를 list[dict]로 반환합니다.
 
@@ -25,7 +27,7 @@ def collect_api_licenses(headers: Dict, licenses: List[str], current_time: str) 
         current_time: str: 현재 시각에 대한 문자열 표현
 
     Returns:
-        list[dict]: 조회한 dict를 리스트로 반환합니다.
+        list[tuple]: 조회한 tuple을 리스트로 반환합니다.
 
     Rasises:
         ValueError: API 실패 시
@@ -42,6 +44,6 @@ def collect_api_licenses(headers: Dict, licenses: List[str], current_time: str) 
     for license in licenses:
         response = github_api(f'/licenses/{license}', headers)
         json = response.json()
-        license_dict = create_license_dict(json, current_time)
-        data.append(license_dict)
+        license_values = create_license_values(json, current_time)
+        data.append(license_values)
     return data

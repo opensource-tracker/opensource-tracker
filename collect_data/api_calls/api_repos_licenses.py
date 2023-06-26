@@ -1,21 +1,21 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from common import github_api
 
 
-def create_repo_license_dict(json: Dict, repo_full_name: str, current_time: str) -> Dict:
-    return {
-        'repo_full_name': repo_full_name,
-        'license_key': json['license']['key'],
-        'sha': json['sha'],
-        'html_url': json['html_url'],
-        'download_url': json['download_url'],
-        'git_url': json['git_url'],
-        'content': json['content'],
-        'called_at': current_time
-    }
+def create_repo_license_values(json: Dict, repo_full_name: str, current_time: str) -> Tuple:
+    return (
+        repo_full_name,
+        json['license']['key'],
+        json['sha'],
+        json['html_url'],
+        json['download_url'],
+        json['git_url'],
+        json['content'],
+        current_time
+    )
 
 
-def collect_api_repos_licenses(headers: Dict, repos: List[str], current_time: str) -> List[Dict]:
+def collect_api_repos_licenses(headers: Dict, repos: List[str], current_time: str) -> List[Tuple]:
     """
     라이센스 키 목록을 받아 GitHub API를 활용하여 그 정보를 list[dict]로 반환합니다.
 
@@ -43,8 +43,9 @@ def collect_api_repos_licenses(headers: Dict, repos: List[str], current_time: st
         try:
             response = github_api(f'/repos/{repo}/license', headers)
             json = response.json()
-            license_dict = create_repo_license_dict(json, repo, current_time)
-            data.append(license_dict)
+            license_values = create_repo_license_values(
+                json, repo, current_time)
+            data.append(license_values)
         except ValueError:
             print(f"There is no licenses on {repo}")
     return data
