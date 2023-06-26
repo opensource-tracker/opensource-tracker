@@ -1,0 +1,16 @@
+{
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": false,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "opensource-tracker.cwnloy15x55i.ap-northeast-2.rds.amazonaws.com",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "ostracker",
+            "database": "ostracker",
+            "username": "postgres",
+            "password": "ostrackerpw"
+        }
+    ]
+}
