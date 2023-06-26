@@ -14,7 +14,7 @@ dag = DAG(
     'dag_v1',
     schedule='0 9 * * *',
     tags=['test'],
-    catchUp=False,
+    catchup=False,
     default_args=default_args
 )
 
