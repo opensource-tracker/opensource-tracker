@@ -45,7 +45,7 @@ def collect_api_repos(HEADERS: Dict, ORGS: List, CURRENT_TIME) -> List[Dict]:
             if len(repos_json) == 0:
                 break
             for repo_json in repos_json:
-                data.append(create_repo_values(repo_json, CURRENT_TIME))
+                data.append(create_repo_dict(repo_json, current_time))
             params['page'] += 1
 
     return data
