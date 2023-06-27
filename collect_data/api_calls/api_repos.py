@@ -31,7 +31,7 @@ def create_repo_values(json: Dict, CURRENT_TIME) -> Tuple:
     )
 
 
-def collect_api_repos(HEADERS: Dict, ORGS: List, CURRENT_TIME) -> List[Dict]:
+def collect_api_repos(headers: Dict, orgs: List, current_time) -> List[Tuple]:
     data = []
     params = {
         "per_page": 100,
@@ -45,7 +45,7 @@ def collect_api_repos(HEADERS: Dict, ORGS: List, CURRENT_TIME) -> List[Dict]:
             if len(repos_json) == 0:
                 break
             for repo_json in repos_json:
-                data.append(create_repo_dict(repo_json, current_time))
+                data.append(create_repo_values(repo_json, current_time))
             params['page'] += 1
 
     return data
