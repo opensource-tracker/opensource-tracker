@@ -58,6 +58,19 @@ def load_csv_from_s3_to_rds():
     begin = EmptyOperator(task_id='begin')
     end = EmptyOperator(task_id='end')
 
+    with TaskGroup('licenses') as licenses:
+        @task()
+        def deal_with_licenses(data: List[Dict]):
+            return data
+        query = """
+            INSERT INTO adhoc.api_licenses
+            (key, name, spdx_id, node_id, url, body, permissions, conditions, limitations, called_at)
+            VALUES
+            (%(key)s, %(name)s, %(spdx_id)s, %(node_id)s, %(url)s, %(body)s, %(permissions)s, %(conditions)s, %(limitations)s, %(called_at)s)
+        """
+
+        save_to_rds(deal_with_licenses(load_from_s3('licenses')), query)
+
     with TaskGroup('orgs') as orgs:
         @task()
         def deal_with_orgs(data: List[Dict]):
@@ -122,7 +135,7 @@ def load_csv_from_s3_to_rds():
         query = """
                 INSERT INTO adhoc.api_repos_issues
                 (repository_url, labels_url, comments_url, events_url, html_url, issues_id, node_id, number, title, state, locked,
-                comments, created_at, updated_at, author_association, body, timeline_url, state_reason, login_user, called_at, 
+                comments, created_at, updated_at, author_association, body, timeline_url, state_reason, login_user, called_at,
                 repo_full_name)
                 VALUES  
                 (%(repository_url)s,%(labels_url)s,%(comments_url)s,%(events_url)s,%(html_url)s,%(issues_id)s,%(node_id)s,%(number)s,%(title)s,%(state)s,%(locked)s,
@@ -132,8 +145,35 @@ def load_csv_from_s3_to_rds():
 
         save_to_rds(deal_with_repos_issues(load_from_s3('repos_issues')), query)
 
+
+    with TaskGroup('repos_languages') as repos_languages:
+        @task()
+        def deal_with_repos_languages(data: List[Dict]):
+            return data
+        query = """
+                INSERT INTO adhoc.api_repos_languages (repo_full_name, language, usage_count, called_at)
+                VALUES  
+                (%(repo_full_name)s, %(language)s, %(usage_count)s, %(called_at)s)
+                """
+
+        save_to_rds(deal_with_repos_languages(load_from_s3('repos_languages')), query) 
+
+        
+    with TaskGroup('repos_licenses') as repos_licenses:
+        @task()
+        def deal_with_repos_licenses(data: List[Dict]):
+            return data
+        query = """
+                INSERT INTO adhoc.api_repos_licenses
+                (repo_full_name, license_key, sha, html_url, download_url, git_url, content, called_at)
+                VALUES  
+                (%(repo_full_name)s, %(license_key)s, %(sha)s, %(html_url)s, %(download_url)s, %(git_url)s, %(content)s, %(called_at)s)
+                """
+
+        save_to_rds(deal_with_repos_licenses(load_from_s3('repos_licenses')), query)    
+
     begin >> [
-        orgs, repos, repos_commits, repos_issues, 
+        licenses, orgs, repos, repos_commits, repos_issues, repos_languages, repos_licenses
     ] >> end
 
 load_csv_from_s3_to_rds()
