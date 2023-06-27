@@ -2,7 +2,7 @@ from common import github_api
 from typing import Dict, List
 
 
-def create_repo_dict(json: Dict, CURRENT_TIME):
+def create_repo_dict(json: Dict, current_time):
     return {
         'repo_id': json['id'],
         'node_id': json['node_id'],
@@ -18,7 +18,7 @@ def create_repo_dict(json: Dict, CURRENT_TIME):
         'created_at': json['created_at'],
         'updated_at': json['updated_at'],
         'pushed_at': json['pushed_at'],
-        'called_at': CURRENT_TIME,
+        'called_at': current_time,
         'size': json['size'],
         'stargazers_count': json['stargazers_count'],
         'forks_count': json['forks_count'],
@@ -30,21 +30,21 @@ def create_repo_dict(json: Dict, CURRENT_TIME):
         'allow_forking': json['allow_forking']
     }
 
-def collect_api_repos(HEADERS: Dict, ORGS: List, CURRENT_TIME) -> List[Dict]:
+def collect_api_repos(headers: Dict, orgs: List, current_time) -> List[Dict]:
     data = []
     params = {
         "per_page": 100,
     }
 
-    for org in ORGS:
+    for org in orgs:
         params['page'] = 1
         while True:
-            response = github_api(f'/orgs/{org}/repos', HEADERS, params)
+            response = github_api(f'/orgs/{org}/repos', headers, params)
             repos_json: List = response.json()
             if len(repos_json) == 0:
                 break
             for repo_json in repos_json:
-                data.append(create_repo_dict(repo_json, CURRENT_TIME))
+                data.append(create_repo_dict(repo_json, current_time))
             params['page'] += 1
 
     return data
