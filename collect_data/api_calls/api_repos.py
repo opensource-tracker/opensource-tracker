@@ -2,7 +2,7 @@ from common import github_api
 from typing import Dict, List, Tuple
 
 
-def create_repo_values(json: Dict, CURRENT_TIME) -> Tuple:
+def create_repo_values(json: Dict, current_time) -> Tuple:
     return (
         json['id'],
         json['node_id'],
@@ -18,7 +18,7 @@ def create_repo_values(json: Dict, CURRENT_TIME) -> Tuple:
         json['created_at'],
         json['updated_at'],
         json['pushed_at'],
-        CURRENT_TIME,
+        current_time,
         json['size'],
         json['stargazers_count'],
         json['forks_count'],

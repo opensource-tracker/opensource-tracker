@@ -50,7 +50,7 @@ def get_file_path(api_name: str, execution_date):
     year = execution_date.strftime("%Y")
     month = execution_date.strftime("%m")
     day = execution_date.strftime("%d")
-    
+
     return f'data/year={year}/month={month}/day={day}/{api_name}.csv'
 
 
@@ -97,7 +97,7 @@ def get_repos_full_name_from_s3(bucket_name, s3_key):
 
     s3_file = hook.select_key(
         s3_key, bucket_name=bucket_name, expression='SELECT "full_name" FROM S3Object', input_serialization=input_serialization)
-    
+
     return s3_file.rstrip().split('\n')
 
 
