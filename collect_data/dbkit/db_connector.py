@@ -29,9 +29,8 @@ class psqlConnector:
             execute_values(_cur, query, values)
             self.conn.commit()
 
-        except errors.UniqueViolation as e:  # api_repos_commits_sha 중복 값 처리
+        except errors.UniqueViolation:  # api_repos_commits_sha 중복 값 처리
             self.conn.rollback()
-            print(f">>> failed insert data into table: {e}")
 
         except psycopg2.Error as e:
             self.conn.rollback()
