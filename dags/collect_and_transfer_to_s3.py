@@ -3,18 +3,22 @@ import sys
 sys.path.append('/opt/airflow')
 sys.path.append('/opt/airflow/collect_data')
 
-
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-from airflow.models import Variable
-from collect_data.api_calls.api_repos import collect_api_repos
 from collect_data.dbkit import queries
+from collect_data.api_calls.api_repos_languages import collect_api_repos_languages
+from collect_data.api_calls.api_repos_licenses import collect_api_repos_licenses
+from collect_data.api_calls.api_repos_issues import collect_api_repos_issues
+from collect_data.api_calls.api_repos_commits import collect_api_repos_commits
+from collect_data.api_calls.api_orgs import collect_api_orgs
+from collect_data.api_calls.api_repos import collect_api_repos
+from airflow.operators.empty import EmptyOperator
+from airflow.decorators import dag, task
+from airflow.models import Variable
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from typing import Dict, List
-import re
-import csv
 from datetime import datetime
-
+import csv
+import re
+from io import StringIO, BytesIO
 
 
 HEADERS = {
@@ -31,94 +35,111 @@ LICENSES = [
     'gpl-3.0', 'lgpl-2.1', 'mit', 'mpl-2.0', 'unlicense'
 ]
 
+api_keyword = {
+    'repos': [collect_api_repos, "API_REPOS_TABLE_INSERT_SQL"],
+    'orgs': [collect_api_orgs, "API_ORGS_TABLE_INSERT_SQL"],
+    # 'licenses': [],
+    'repos_commits': [collect_api_repos_commits, "API_REPOS_COMMITS_TABLE_INSERT_SQL"],
+    'repos_issues': [collect_api_repos_issues, "API_REPOS_ISSUES_TABLE_INSERT_SQL"],
+    'repos_licenses': [collect_api_repos_licenses, "API_REPOS_LICENSES_TABLE_INSERT_SQL"],
+    'repos_languages': [collect_api_repos_languages, "API_REPOS_LANGUAGES_TABLE_INSERT_SQL"],
+}
 
-def collect_repos_data(headers: Dict, orgs: List, execution_date, **kwargs) -> List[tuple]:
-    data = collect_api_repos(headers, orgs, execution_date) # <- 이렇게 동작하도록 데코레이터 써서 코드 수정할 것
-    sql_name = "API_REPOS_TABLE_INSERT_SQL"
 
-    kwargs['ti'].xcom_push(key='data', value=data)
-    kwargs['ti'].xcom_push(key='sql_name', value=sql_name)
+def collect_data(api_name: str, headers: Dict, val: List, execution_date) -> List[tuple]:
+    data = api_keyword[api_name][0](headers, val, execution_date)
+    return data
 
 
-def write_to_csv(api_name: str, execution_date, **kwargs):
-    data = kwargs['ti'].xcom_pull(key='data')
-    sql_name = kwargs['ti'].xcom_pull(key='sql_name')
-
+def get_file_path(api_name: str, execution_date):
     year = execution_date.strftime("%Y")
     month = execution_date.strftime("%m")
     day = execution_date.strftime("%d")
+    
+    return f'data/year={year}/month={month}/day={day}/{api_name}.csv'
 
-    ### sql_name 이용해서 해당 query split
+
+def write_to_csv(api_name: str, data: List[tuple]):
+    sql_name = api_keyword[api_name][1]
+
+    # sql_name 이용해서 해당 query split
     query = getattr(queries, sql_name)
 
     # 정규표현식
     matches = re.search(r"\(([^)]+)\)", query)
 
-    ### csv header 처리 ['a', 'b', ... 'd']
+    # csv header 처리 ['a', 'b', ... 'd']
     fieldnames = [column.strip() for column in matches.group(1).split(",")]
     fieldnames = [name for name in fieldnames if name]  # 빈 문자열 제거
 
-    filepath = f'/opt/airflow/data/{year}/{month}/{day}/{api_name}.csv'
+    # csv data buffer에 저장
 
-    # dir 경로 추출
-    directory = os.path.dirname(filepath)
+    csv_buffer = StringIO()
+    csv_writer = csv.writer(csv_buffer, fieldnames, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
+    csv_writer.writerow(fieldnames)
+    csv_writer.writerows(data)
 
-    # dir 존재하지 않을 경우 생성
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-    # csv data dir에 저장
-    with open(filepath, 'w') as output_file:
-        csv_writer = csv.writer(output_file, fieldnames, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-        csv_writer.writerow(fieldnames)
-        csv_writer.writerows(data) # [(), ()]
-
-    kwargs['ti'].xcom_push(key='filepath', value=filepath)
+    csv_byte_buffer = BytesIO(csv_buffer.getvalue().encode())
+    return csv_byte_buffer
 
 
-def upload_to_s3(bucket_name: str, **kwargs) -> None:
-    filepath = kwargs['ti'].xcom_pull(key='filepath')
-    base_path = '/opt/airflow/'
-    s3_key = os.path.relpath(filepath, base_path)
-
+def upload_to_s3(bucket_name, s3_key: str, csv_buffer) -> None:
     hook = S3Hook('s3_conn')
-    hook.load_file(filename=filepath, key=s3_key, bucket_name=bucket_name)
-    os.remove(filepath) # 멱등성 위해 파일 삭제
+    hook.load_file_obj(file_obj=csv_buffer, key=s3_key, bucket_name=bucket_name, replace=True)
 
 
-default_args = {
-    'owner': 'airflow',
-    'headers': HEADERS,
-    'orgs': ORGS,
-    'bucket_name': 'ostracker'
-}
+def get_repos_full_name_from_s3(bucket_name, s3_key):
+    input_serialization = {
+    'CSV': {
+        'FileHeaderInfo': 'USE',
+        'RecordDelimiter': '\n',
+        'FieldDelimiter': ',',
+        'Comments': '#',
+        }
+    }
+    s3_key = '/'.join(s3_key.split('/')[:-1]) + '/repos.csv'
+    hook = S3Hook('s3_conn')
 
-with DAG(
-    'collect_data_and_upload_to_s3',
-    default_args=default_args,
-    schedule_interval = '0 1 * * *',
-    start_date = datetime(2022, 1, 1),
-    catchup = False
-) as dag:
+    s3_file = hook.select_key(
+        s3_key, bucket_name=bucket_name, expression='SELECT "full_name" FROM S3Object', input_serialization=input_serialization)
+    
+    return s3_file.rstrip().split('\n')
 
-    collect_repos_data = PythonOperator(
-        task_id = 'collect_repos_data',
-        python_callable=collect_repos_data,
-        provide_context=True,
-        op_kwargs = {'headers': HEADERS, 'orgs': ORGS},
-    )
 
-    write_repos_to_csv = PythonOperator(
-        task_id = 'write_repos_to_csv',
-        python_callable=write_to_csv,
-        op_kwargs={'api_name': 'repos'},
-        provide_context=True,
-    )
+def create_task(api_name):
+    @task(task_id=f'task_{api_name}')
+    def task_for(api_name: str, **kwargs):
+        execution_date = kwargs['execution_date']
+        bucket_name = Variable.get('bucket_name')
+        headers = HEADERS
+        orgs = ORGS
+        s3_key = get_file_path(api_name, execution_date)
 
-    upload_repos_csv = PythonOperator(
-        task_id = 'upload_repos_csv',
-        python_callable=upload_to_s3,
-        op_args=['ostracker'],
-    )
+        if api_name in ['repos_issues', 'repos_commits', 'repos_licenses', 'repos_languages']:
+            repos = get_repos_full_name_from_s3(bucket_name, s3_key)
+            data = collect_data(api_name, headers, repos, execution_date)
+        else:
+            data = collect_data(api_name, headers, orgs, execution_date)
 
-    collect_repos_data >> write_repos_to_csv >> upload_repos_csv
+        csv_buffer = write_to_csv(api_name, data)
+        upload_to_s3(bucket_name, s3_key, csv_buffer)
+    return task_for(api_name)
+
+
+@dag(
+    schedule='0 1 * * *',
+    start_date=datetime(2023, 6, 25),
+    default_args={
+        'owner': 'airflow',
+        'headers': HEADERS,
+        'orgs': ORGS,
+    },
+    catchup=False,
+)
+def extract_data_and_save_csv_to_s3():
+    begin = EmptyOperator(task_id='begin')
+    end = EmptyOperator(task_id='end')
+
+    begin >> create_task('repos') >> [create_task(api_name) for api_name in api_keyword.keys() if api_name != 'repos'] >> end
+
+extract_data_and_save_csv_to_s3()
