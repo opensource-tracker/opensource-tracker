@@ -32,8 +32,8 @@ LICENSES = [
 ]
 
 
-def collect_repo_data(headers: Dict, orgs: List, execution_date, **kwargs) -> List[tuple]:
-    data = collect_api_repos(headers, orgs, execution_date.strftime("%Y%m%d"))
+def collect_repos_data(headers: Dict, orgs: List, execution_date, **kwargs) -> List[tuple]:
+    data = collect_api_repos(headers, orgs, execution_date) # <- 이렇게 동작하도록 데코레이터 써서 코드 수정할 것
     sql_name = "API_REPOS_TABLE_INSERT_SQL"
 
     kwargs['ti'].xcom_push(key='data', value=data)
@@ -101,24 +101,24 @@ with DAG(
     catchup = False
 ) as dag:
 
-    collect_repo_data = PythonOperator(
-        task_id = 'collect_repo_data',
-        python_callable=collect_repo_data,
+    collect_repos_data = PythonOperator(
+        task_id = 'collect_repos_data',
+        python_callable=collect_repos_data,
         provide_context=True,
         op_kwargs = {'headers': HEADERS, 'orgs': ORGS},
     )
 
-    write_repo_to_csv = PythonOperator(
-        task_id = 'write_repo_to_csv',
+    write_repos_to_csv = PythonOperator(
+        task_id = 'write_repos_to_csv',
         python_callable=write_to_csv,
-        op_kwargs={'api_name': 'repo'},
+        op_kwargs={'api_name': 'repos'},
         provide_context=True,
     )
 
-    upload_repo_csv = PythonOperator(
-        task_id = 'upload_repo_csv',
+    upload_repos_csv = PythonOperator(
+        task_id = 'upload_repos_csv',
         python_callable=upload_to_s3,
         op_args=['ostracker'],
     )
 
-    collect_repo_data >> write_repo_to_csv >> upload_repo_csv
+    collect_repos_data >> write_repos_to_csv >> upload_repos_csv
