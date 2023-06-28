@@ -48,7 +48,7 @@ def get_object_key(api_name: str, date: datetime) -> str:
     year = date.strftime('%Y')
     month = date.strftime('%m')
     day = date.strftime('%d')
-    return f'data/{year}/{month}/{day}/{api_name}.csv'
+    return f'data/year={year}/month={month}/day={day}/{api_name}.csv'
 
 @dag(
     dag_id='s3_to_rds',
@@ -58,7 +58,7 @@ def get_object_key(api_name: str, date: datetime) -> str:
 )
 def load_to_rds():
     """
-    S3에 적재한 /year=yyyy/month=mm/day=dd/api.csv` 형식의 파일을 RDS에 적재합니다.
+    S3에 적재한 /year={yyyy}/month={mm}/day={dd}/api.csv` 형식의 파일을 RDS에 적재합니다.
     """
     begin = EmptyOperator(task_id='begin')
     end = EmptyOperator(task_id='end')
