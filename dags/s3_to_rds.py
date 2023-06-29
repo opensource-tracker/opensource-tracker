@@ -75,11 +75,14 @@ def load_to_rds():
         task_for(api_name='repos_licenses', query=queries.API_REPOS_LICENSES_TABLE_INSERT_SQL),
     ] >> end
 
-@task()
 def task_for(api_name: str, query: str):
-    s3_key = get_object_key(api_name, datetime.now())
-    data = load_from_s3(s3_key)
-    save_to_rds(data, query)
+    @task(task_id=f'task_{api_name}')
+    def _task_for(api_name: str, query: str, **kwargs):
+        execution_date = kwargs['execution_date']
+        s3_key = get_object_key(api_name, execution_date)
+        data = load_from_s3(s3_key)
+        save_to_rds(data, query)
+    return _task_for(api_name, query)
 
 load_to_rds()
 
