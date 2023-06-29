@@ -31,21 +31,21 @@ def create_repo_values(json: Dict, CURRENT_TIME) -> Tuple:
     )
 
 
-def collect_api_repos(HEADERS: Dict, ORGS: List, CURRENT_TIME) -> List[Tuple]:
+def collect_api_repos(headers: Dict, orgs: List, current_time) -> List[Tuple]:
     data = []
     params = {
         "per_page": 100,
     }
 
-    for org in ORGS:
+    for org in orgs:
         params['page'] = 1
         while True:
-            response = github_api(f'/orgs/{org}/repos', HEADERS, params)
+            response = github_api(f'/orgs/{org}/repos', headers, params)
             repos_json: List = response.json()
             if len(repos_json) == 0:
                 break
             for repo_json in repos_json:
-                data.append(create_repo_values(repo_json, CURRENT_TIME))
+                data.append(create_repo_values(repo_json, current_time))
             params['page'] += 1
 
     return data

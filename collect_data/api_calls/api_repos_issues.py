@@ -63,4 +63,6 @@ def collect_api_repos_issues(HEADERS: Dict, repos: List, CURRENT_TIME) -> List[T
                     issue_json, CURRENT_TIME, repo))
             params['page'] += 1
 
+            break # 짧은 테스트를 위한 임시 break문 추가
+
     return data
