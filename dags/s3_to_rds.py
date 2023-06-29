@@ -1,26 +1,22 @@
 from typing import Dict, List
 from airflow.decorators import dag, task
 from airflow.operators.empty import EmptyOperator
-from dotenv import load_dotenv
+from airflow.models import Variable
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from psycopg2.extras import execute_values
 from datetime import datetime
-load_dotenv()
 
 def load_from_s3(s3_key: str) -> List[List]:
     """
     s3_key를 받아 S3에서 데이터를 불러옵니다.
     """
     import logging
-    import boto3
     import csv
     import io
-    import os
-    s3 = boto3.client('s3',
-        region_name=os.getenv('AWS_REGION_NAME'),
-        aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    )
-    response = s3.get_object(Bucket=os.getenv('AWS_S3_BUCKET'), Key=s3_key)
-    input = io.StringIO(response['Body'].read().decode('utf-8'), newline='')
+    hook = S3Hook('s3_conn')
+    content = hook.read_key(key=s3_key, bucket_name=Variable.get('AWS_S3_BUCKET'))
+    input = io.StringIO(content.decode('utf-8'), newline='')
     reader = csv.reader(input, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
     next(reader) # skip header
     result = [row for row in reader]
@@ -28,20 +24,12 @@ def load_from_s3(s3_key: str) -> List[List]:
     return result
 
 def save_to_rds(data: List[Dict], query: str):
-    import psycopg2
     import logging
-    import os
-    from psycopg2.extras import execute_values
-    db = psycopg2.connect(
-        host=os.environ.get('DB_HOST'),
-        dbname=os.environ.get('DB_NAME'),
-        user=os.environ.get('DB_USER_NAME'),
-        password=os.environ.get('DB_USER_PASSWORD'),
-        port=os.environ.get('DB_PORT')
-    )
-    cursor = db.cursor()
+    hook = PostgresHook('ostracker_conn')
+    conn = hook.get_conn()
+    cursor = conn.cursor()
     execute_values(cursor, query, data)
-    db.commit()
+    conn.commit()
     logging.info(f'saved {len(data)} rows for repos into rds')
 
 def get_object_key(api_name: str, date: datetime) -> str:
