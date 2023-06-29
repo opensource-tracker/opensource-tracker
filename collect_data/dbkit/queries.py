@@ -85,3 +85,65 @@ JOIN (
 WHERE repos.called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY 1 DESC LIMIT 1)
 ORDER BY 2;
 """
+
+ELT_RECENT_REPOS_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.recent_repos;
+CREATE TABLE analytics.recent_repos (
+    repo_name VARCHAR(255),
+    organization VARCHAR(255),
+    stars INT,
+    language VARCHAR(255),
+    description TEXT
+);
+"""
+
+ELT_RECENT_REPOS_TABLE_INSESRT_SQL = """
+WITH tmp_recent_repos AS (
+    SELECT *
+    FROM (
+        SELECT
+            org.name as organization,
+            repo.name as repo_name,
+            stargazers_count as stars,
+            repo.description as description,
+            language,
+            repo.called_at,
+            ROW_NUMBER() OVER (PARTITION BY repo.name ORDER BY repo.called_at DESC) AS time_rank
+        FROM raw_data.api_repos repo
+        JOIN raw_data.api_orgs org
+        ON repo.owner_id = org.orgs_id
+    ) AS sub
+    WHERE time_rank = 1
+)
+INSERT INTO analytics.recent_repos (repo_name, organization, stars, language, description)
+SELECT
+    repo_name,
+    organization,
+    stars,
+    language,
+    description
+FROM tmp_recent_repos;
+"""
+
+ELT_LANGUAGES_PER_REPOS_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.languages_per_repos;
+CREATE TABLE analytics.languages_per_repos (
+    repo_name VARCHAR(255),
+    organization VARCHAR(255),
+    language VARCHAR(255),
+    usage_count INT
+);
+"""
+
+ELT_LANGUAGES_PER_REPOS_TABLE_INSERT_SQL = """
+INSERT INTO analytics.languages_per_repos (repo_name, organization, language, usage_count)
+SELECT
+    DISTINCT SPLIT_PART(lang.repo_full_name, '/', 2) as repo_name,
+    org.name as organization,
+    lang.language,
+    usage_count
+FROM raw_data.api_repos_languages lang
+JOIN raw_data.api_repos repos ON lang.repo_full_name = repos.full_name
+JOIN raw_data.api_orgs org ON repos.owner_id = org.orgs_id
+WHERE lang.called_at = (SELECT called_at FROM raw_data.api_repos_languages ORDER BY 1 DESC LIMIT 1)
+"""
