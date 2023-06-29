@@ -140,16 +140,5 @@ def extract_data_and_save_csv_to_s3():
     )
 
     begin >> create_task('repos') >> [create_task(api_name) for api_name in api_keyword.keys() if api_name != 'repos'] >> s3_to_rds
-    # orgs가 repos에 대해 종속성이 없으면 아래처럼 해도 괜찮을까요?
-    # 이렇게 하면 orgs는 repos, repos_commits, ...와 무관하게 실행됩니다. 네 orgs는 종속성이 없어서 그렇게 실행해도 좋을거 같습니다.
-    # begin >> [
-    #     create_task('orgs'),
-    #     create_task('repos') >> [
-    #         create_task('repos_commits'),
-    #         create_task('repos_issues'),
-    #         create_task('repos_licenses'),
-    #         create_task('repos_languages'),
-    #     ],
-    # ] >> s3_to_rds
 
 extract_data_and_save_csv_to_s3()

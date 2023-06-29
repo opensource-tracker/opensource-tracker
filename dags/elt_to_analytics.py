@@ -1,5 +1,6 @@
 from airflow.decorators import dag, task
 from airflow.operators.empty import EmptyOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from datetime import datetime
 from typing import List
 
@@ -13,15 +14,8 @@ load_dotenv()
 #   2. Use SQL provider: https://airflow.apache.org/docs/apache-airflow-providers-common-sql/stable/index.html
 
 def execute_sqls(sqls: List[str]):
-    import psycopg2
-    conn = psycopg2.connect(
-        host=os.environ.get('DB_HOST'),
-        dbname=os.environ.get('DB_NAME'),
-        user=os.environ.get('DB_USER_NAME'),
-        password=os.environ.get('DB_USER_PASSWORD'),
-        port=os.environ.get('DB_PORT')
-    )
-
+    hook = PostgresHook('ostracker_conn')
+    conn = hook.get_conn()
     cursor = conn.cursor()
     for line in sqls:
         cursor.execute(line)
@@ -40,13 +34,15 @@ def create_licenses_per_repos_table():
         queries.ELT_LICENSES_PER_REPOS_TABLE_INSERT_SQL,
     ])
 
+
+
 @dag(
     start_date=datetime(2023, 6, 29),
 )
 def elt_to_analytics():
     begin = EmptyOperator(task_id="begin")
     end = EmptyOperator(task_id="end")
-    
+
     begin >> [
         create_licenses_per_repos_table()
     ] >> end
