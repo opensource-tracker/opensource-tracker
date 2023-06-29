@@ -40,7 +40,7 @@ def create_repo_issue_values(json: Dict, CURRENT_TIME: str, repo_full_name: str)
 def collect_api_repos_issues(HEADERS: Dict, repos: List, CURRENT_TIME) -> List[Tuple]:
     data = []
     params = {
-        "per_page": 100,
+        "per_page": 1,
     }
 
     for repo in repos:

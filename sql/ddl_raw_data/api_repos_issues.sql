@@ -1,13 +1,13 @@
-CREATE TABLE adhoc.api_repos_issues (
-    repository_url TEXT NOT NULL,
+CREATE TABLE raw_data.api_repos_issues (
+    repository_url TEXT ,
     labels_url TEXT,
     comments_url TEXT,
     events_url TEXT,
     html_url TEXT,
-    issues_id INT NOT NULL,
-    node_id VARCHAR(255),
+    issues_id INT ,
+    node_id TEXT,
     number INT,
-    title VARCHAR(255),
+    title TEXT,
     state VARCHAR(10),
     locked BOOLEAN DEFAULT FALSE,
     comments INT,
@@ -16,8 +16,8 @@ CREATE TABLE adhoc.api_repos_issues (
     author_association VARCHAR(50),
     body TEXT,
     timeline_url TEXT,
-    state_reason VARCHAR(100)[],
+    state_reason varchar(50),
     login_user VARCHAR(70),
     called_at TIMESTAMPTZ,
-    repo_full_name VARCHAR(255) NOT NULL
+    repo_full_name TEXT
 );

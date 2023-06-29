@@ -19,7 +19,11 @@ def load_from_s3(s3_key: str) -> List[List]:
     input = io.StringIO(content.decode('utf-8'), newline='')
     reader = csv.reader(input, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
     next(reader) # skip header
-    result = [row for row in reader]
+    result = []
+    for row in reader:
+        row = [cell if cell else None for cell in row]
+        result.append(row)
+
     logging.info(f'loaded {len(result)} rows for repos')
     return result
 
@@ -42,7 +46,8 @@ def get_object_key(api_name: str, date: datetime) -> str:
     dag_id='s3_to_rds',
     schedule='@daily',
     start_date=datetime(2023, 6, 25, hour=0, minute=0),
-    default_args={'retries': 1},
+    default_args={'retries': 0},
+    catchup=False
 )
 def load_to_rds():
     """
@@ -54,7 +59,7 @@ def load_to_rds():
     from collect_data.dbkit import queries
 
     begin >> [
-        task_for(api_name='licenses', query=queries.API_LICENSES_TABLE_INSERT_SQL),
+        # task_for(api_name='licenses', query=queries.API_LICENSES_TABLE_INSERT_SQL),
         task_for(api_name='orgs', query=queries.API_ORGS_TABLE_INSERT_SQL),
         task_for(api_name='repos', query=queries.API_REPOS_TABLE_INSERT_SQL),
         task_for(api_name='repos_commits', query=queries.API_REPOS_COMMITS_TABLE_INSERT_SQL),

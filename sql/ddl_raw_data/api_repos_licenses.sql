@@ -1,10 +1,10 @@
-CREATE TABLE adhoc.api_repos_licenses (
-  repo_full_name VARCHAR(255) NOT NULL,
+CREATE TABLE raw_data.api_repos_licenses (
+  repo_full_name VARCHAR(255),
   license_key    VARCHAR(255),
-  sha            VARCHAR(50) NOT NULL,
-  html_url       TEXT NOT NULL,
-  download_url   TEXT NOT NULL,
-  git_url        TEXT NOT NULL,
+  sha            VARCHAR(50),
+  html_url       TEXT,
+  download_url   TEXT,
+  git_url        TEXT,
   content        TEXT,
-  called_at      TIMESTAMP NOT NULL
+  called_at      TIMESTAMP
 );
