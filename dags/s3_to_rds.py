@@ -16,7 +16,7 @@ def load_from_s3(s3_key: str) -> List[List]:
     import io
     hook = S3Hook('s3_conn')
     content = hook.read_key(key=s3_key, bucket_name=Variable.get('AWS_S3_BUCKET'))
-    input = io.StringIO(content.decode('utf-8'), newline='')
+    input = io.StringIO(content, newline='')
     reader = csv.reader(input, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
     next(reader) # skip header
     result = []

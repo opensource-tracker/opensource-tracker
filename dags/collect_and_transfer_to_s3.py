@@ -106,7 +106,7 @@ def create_task(api_name):
     @task(task_id=f'task_{api_name}')
     def task_for(api_name: str, **kwargs):
         execution_date = kwargs['execution_date']
-        bucket_name = Variable.get('bucket_name')
+        bucket_name = Variable.get('AWS_S3_BUCKET')
         headers = HEADERS
         orgs = ORGS
         s3_key = get_file_path(api_name, execution_date)
