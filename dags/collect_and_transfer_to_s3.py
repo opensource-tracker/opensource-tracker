@@ -1,8 +1,3 @@
-import os
-import sys
-sys.path.append('/opt/airflow')
-sys.path.append('/opt/airflow/collect_data')
-
 from collect_data.dbkit import queries
 from collect_data.api_calls.api_repos_languages import collect_api_repos_languages
 from collect_data.api_calls.api_repos_licenses import collect_api_repos_licenses
