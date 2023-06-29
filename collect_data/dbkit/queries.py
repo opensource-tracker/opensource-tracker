@@ -54,3 +54,34 @@ API_REPOS_LANGUAGES_TABLE_INSERT_SQL = """
 INSERT INTO adhoc.api_repos_languages (repo_full_name, language, usage_count, called_at)
 VALUES %s;
 """
+
+ELT_LICENSES_PER_REPOS_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.licenses_per_repos;
+CREATE TABLE analytics.licenses_per_repos (
+    repo VARCHAR(255),
+    organization VARCHAR(255),
+    name VARCHAR(255),
+    spdx_id VARCHAR(40)
+);
+"""
+
+ELT_LICENSES_PER_REPOS_TABLE_INSERT_SQL = """
+INSERT INTO analytics.licenses_per_repos (repo, organization, name, spdx_id)
+SELECT
+  DISTINCT repos.full_name as repo,
+  orgs.name as organization,
+  ls.name,
+  ls.spdx_id
+FROM adhoc.api_repos repos
+JOIN (
+  SELECT orgs_id, name FROM adhoc.api_orgs WHERE called_at = (SELECT called_at FROM adhoc.api_orgs ORDER BY 1 DESC LIMIT 1)
+) orgs ON repos.owner_id = orgs.orgs_id
+JOIN (
+  SELECT repo_full_name, license_key FROM adhoc.api_repos_licenses WHERE called_at = (SELECT called_at FROM adhoc.api_repos_licenses ORDER BY 1 DESC LIMIT 1)
+) rl ON repos.full_name = rl.repo_full_name
+JOIN (
+  SELECT key, name, spdx_id FROM adhoc.api_licenses WHERE called_at = (SELECT called_at FROM adhoc.api_licenses ORDER BY 1 DESC LIMIT 1)
+) ls ON ls.key = rl.license_key
+WHERE repos.called_at = (SELECT called_at FROM adhoc.api_repos ORDER BY 1 DESC LIMIT 1)
+ORDER BY 2;
+"""
