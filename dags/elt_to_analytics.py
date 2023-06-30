@@ -13,12 +13,22 @@ from collect_data.dbkit import queries
 def execute_sqls(sqls: List[str]):
     hook = PostgresHook('ostracker_conn')
     conn = hook.get_conn()
-    cursor = conn.cursor()
-    for line in sqls:
-        cursor.execute(line)
-    conn.commit()
-    cursor.close()
-    conn.close()
+
+    try:
+        cursor = conn.cursor()
+
+        for line in sqls:
+            cursor.execute(line)
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise e
+    
+    finally:
+        cursor.close()
+        conn.close()
+
 
 @task()
 def create_licenses_per_repos_table():
@@ -47,25 +57,46 @@ def create_languages_per_repos_table():
         queries.ELT_LANGUAGES_PER_REPOS_TABLE_INSERT_SQL
     ])
 
+def create_commits_per_repos_and_sha_table():
+    """
+    raw_data 스키마의 테이블에 기반하여 analytics.commits_per_sha 테이블을 만듭니다.
+    """
+    execute_sqls([
+        queries.ELT_REPOS_COMMITS_PER_PER_REPOS_AND_SHA_TABLE_CREATE_SQL,
+        queries.ELT_TEMP_REPOS_COMMITS_PER_REPOS_AND_SHA_TABLE_CREATE_SQL,
+        queries.ELT_COMMITS_PER_REPOS_AND_SHA_TABLE_INCREMENTAL_UPDATE_SQL,
+    ])
+
+@task()
+def create_contributors_per_repos_and_day_table():
+    """
+    analytics 스키마의 commits_per_day 테이블에 기반하여 analytics.contributors_per_day 테이블을 만듭니다.
+    """
+    execute_sqls([
+        queries.ELT_REPOS_CONTRIBUTORS_COUNT_PER_REPOS_AND_DAY_TABLE_CREATE_SQL,
+        queries.ELT_REPOS_CONTRIBUTORS_COUNT_PER_REPOS_AND_DAY_TABLE_INSERT_SQL,
+    ])
+
 @task()
 def create_repo_info_per_orgs_table():
     execute_sqls([
         queries.ELT_REPO_INFO_PER_ORGS_TABLE_CREATE_SQL,
-        queries.ELT_REPO_INFO_PER_ORGS_TABLE_INSERT_SQL
-    ])
+        queries.ELT_REPO_INFO_PER_ORGS_TABLE_INSERT_SQL,
+        ])
+        
+
+@task()
+def create_stars_per_orgs_table():
+    execute_sqls([
+        queries.ELT_STARS_PER_ORGS_TABLE_CREATE_SQL,
+        queries.ELT_STARS_PER_ORGS_TABLE_INSERT_SQL,
+        ])
 
 @task()
 def create_issues_per_orgs_table():
     execute_sqls([
         queries.ELT_ISSUES_PER_ORGS_TABLE_CREATE_SQL,
-        queries.ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL
-    ])
-    
-@task()
-def create_stars_per_orgs_table():
-    execute_sqls([
-        queries.ELT_STARS_PER_ORGS_TABLE_CREATE_SQL,
-        queries.ELT_STARS_PER_ORGS_TABLE_INSERT_SQL
+        queries.ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL,
     ])
 
 @dag(
@@ -80,10 +111,11 @@ def elt_to_analytics():
         create_licenses_per_repos_table(),
         create_recent_repos_table(),
         create_languages_per_repos_table(),
+        create_commits_per_repos_and_sha_table(),
         create_repo_info_per_orgs_table(),
         create_issues_per_orgs_table(),
         create_stars_per_orgs_table(),
-    ] >> end
+    ] >> create_contributors_per_repos_and_day_table() >> end
 
 elt_to_analytics()
 
