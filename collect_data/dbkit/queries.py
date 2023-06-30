@@ -154,26 +154,26 @@ WHERE lang.called_at = (SELECT called_at FROM raw_data.api_repos_languages ORDER
 ELT_REPO_INFO_PER_ORGS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.repo_info_per_orgs;
 CREATE TABLE analytics.repo_info_per_orgs (
-	organization VARCHAR(255),
-	repo VARCHAR(255),
-	updated_at TIMESTAMPTZ 
+    organization VARCHAR(255),
+    repo VARCHAR(255),
+    updated_at TIMESTAMPTZ 
 );
 """ 
 
 ELT_REPO_INFO_PER_ORGS_TABLE_INSERT_SQL = """
 INSERT INTO analytics.repo_info_per_orgs (organization, repo, updated_at)
 SELECT
-	orgs.name AS organization,
-	repo.name AS repo,
-	repo.updated_at AS updated_at
+    orgs.name AS organization,
+    repo.name AS repo,
+    repo.updated_at AS updated_at
 FROM raw_data.api_repos AS repo
 LEFT JOIN
-	  (SELECT 
-	  		DISTINCT(orgs_id),
-	        name
-	  FROM raw_data.api_orgs
-	  WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
-	  ) AS orgs ON repo.owner_id = orgs.orgs_id
+      (SELECT 
+            DISTINCT(orgs_id),
+            name
+      FROM raw_data.api_orgs
+      WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
+      ) AS orgs ON repo.owner_id = orgs.orgs_id
 WHERE called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY called_at DESC LIMIT 1);
 """
 
