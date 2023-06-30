@@ -97,7 +97,11 @@ def get_repos_full_name_from_s3(bucket_name, s3_key):
     hook = S3Hook('s3_conn')
 
     s3_file = hook.select_key(
-        s3_key, bucket_name=bucket_name, expression='SELECT "full_name" FROM S3Object', input_serialization=input_serialization)
+        key=s3_key,
+        bucket_name=bucket_name,
+        expression='SELECT "full_name" FROM S3Object',
+        input_serialization=input_serialization
+    )
 
     return s3_file.rstrip().split('\n')
 
