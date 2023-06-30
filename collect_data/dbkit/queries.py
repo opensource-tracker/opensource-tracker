@@ -74,13 +74,16 @@ SELECT
   ls.spdx_id
 FROM raw_data.api_repos repos
 JOIN (
-  SELECT orgs_id, name FROM raw_data.api_orgs WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY 1 DESC LIMIT 1)
+  SELECT orgs_id, name FROM raw_data.api_orgs WHERE called_at =
+  (SELECT called_at FROM raw_data.api_orgs ORDER BY 1 DESC LIMIT 1)
 ) orgs ON repos.owner_id = orgs.orgs_id
 JOIN (
-  SELECT repo_full_name, license_key FROM raw_data.api_repos_licenses WHERE called_at = (SELECT called_at FROM raw_data.api_repos_licenses ORDER BY 1 DESC LIMIT 1)
+  SELECT repo_full_name, license_key FROM raw_data.api_repos_licenses WHERE called_at =
+  (SELECT called_at FROM raw_data.api_repos_licenses ORDER BY 1 DESC LIMIT 1)
 ) rl ON repos.full_name = rl.repo_full_name
 JOIN (
-  SELECT key, name, spdx_id FROM raw_data.api_licenses WHERE called_at = (SELECT called_at FROM raw_data.api_licenses ORDER BY 1 DESC LIMIT 1)
+  SELECT key, name, spdx_id FROM raw_data.api_licenses WHERE called_at =
+  (SELECT called_at FROM raw_data.api_licenses ORDER BY 1 DESC LIMIT 1)
 ) ls ON ls.key = rl.license_key
 WHERE repos.called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY 1 DESC LIMIT 1)
 ORDER BY 2;
@@ -171,4 +174,57 @@ SELECT
 FROM raw_data.api_repos_issues issues
 LEFT JOIN raw_data.api_repos repos ON issues.repo_full_name = repos.full_name
 LEFT JOIN raw_data.api_orgs org ON repos.owner_id = org.orgs_id
+"""
+ELT_REPOS_COMMITS_PER_PER_REPOS_AND_SHA_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.commits_per_sha;
+CREATE TABLE analytics.commits_per_sha (
+	sha	varchar(255),
+	commit_author_name varchar(70),
+	commit_author_date	timestamp,
+	commit_message text,
+	repo_full_name varchar(255),
+	called_at timestamp
+);
+"""
+
+ELT_TEMP_REPOS_COMMITS_PER_REPOS_AND_SHA_TABLE_CREATE_SQL = """
+CREATE TEMP TABLE t_commits_per_sha AS SELECT * FROM raw_data.api_repos_commits;
+"""
+
+ELT_COMMITS_PER_REPOS_AND_SHA_TABLE_INCREMENTAL_UPDATE_SQL = """
+INSERT INTO analytics.commits_per_sha
+SELECT sha, commit_author_name, commit_author_date, commit_message, repo_full_name, called_at
+FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY sha ORDER BY called_at DESC) seq
+    FROM t_commits_per_sha
+) subquery_alias
+WHERE seq = 1;
+"""
+
+ELT_REPOS_CONTRIBUTORS_COUNT_PER_REPOS_AND_DAY_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.contributors_per_day;
+CREATE TABLE analytics.contributors_per_day (
+    commit_date DATE,
+    commit_author_name VARCHAR(70),
+    repo_full_name VARCHAR(255)
+);
+"""
+
+ELT_REPOS_CONTRIBUTORS_COUNT_PER_REPOS_AND_DAY_TABLE_INSERT_SQL = """
+INSERT INTO analytics.contributors_per_day (commit_date, commit_author_name, repo_full_name)
+SELECT
+    DATE(commit_author_date) AS commit_date,
+    commit_author_name,
+    repo_full_name
+FROM
+    raw_data.api_repos_commits
+WHERE
+    commit_author_date >= now() - INTERVAL '31 days' AND
+    commit_author_date < CURRENT_DATE - INTERVAL '1 day' + INTERVAL '1 day' - INTERVAL '1 microsecond'
+GROUP BY
+    DATE(commit_author_date),
+    repo_full_name,
+    commit_author_name
+ORDER BY
+    commit_date;
 """
