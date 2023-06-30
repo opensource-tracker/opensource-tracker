@@ -5,15 +5,16 @@
 ## Team
 
 - 프로그래머스 데이터엔지니어링 데브코스 1기
-- 2차 프로젝트 1팀 1조
-- 기간: 2023. 05. 29. (월) ~ 06. 02. (금)
+- 2, 3차 프로젝트 1팀 1조
+  - 2차 기간: 2023. 05. 29. (월) ~ 06. 02. (금)
+  - 3차 기간: 2023. 06. 26. (월) ~ 06. 30. (금)
 
 | **김민석** | **서대원** | **안수빈** | **이수영** | **정희원** |
 |:---:|:---:|:---:|:---:|:---:|
 | ![kmus1232](https://github.com/kmus1232.png) | ![DaewonSeo](https://github.com/DaewonSeo.png) | ![nyeong](https://github.com/nyeong.png) | ![jeslsy](https://github.com/jeslsy.png) | ![heewoneha](https://github.com/heewoneha.png) |
 
 
-## Result of This Project
+## Results of This Project
 
 > ⭐ 대시보드에서 Organization과 Repository 이름에 대한 필터를 걸 수 있습니다.
 
@@ -35,7 +36,9 @@
 | Language | <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=Python&logoColor=white"/> |
 | Data Base | <img src="https://img.shields.io/badge/Amazon RDS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white"/> <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white"/>  |
 | Dashboard | <img src="https://img.shields.io/badge/Preset-04B404?style=for-the-badge&logo=preset&logoColor=white"/> |
-| Cron-job | <img src="https://img.shields.io/badge/github actions-181717?style=for-the-badge&logo=githubactions&logoColor=white"> |
+| ETL & ELT | <img src="https://img.shields.io/badge/Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white"/> <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/> <img src="https://img.shields.io/badge/AMAZON S3-FA5858?style=for-the-badge&logo=amazons3&logoColor=white"/>
+| Web | (TODO) |
+| ~~Cron-job~~ | <img src="https://img.shields.io/badge/github actions-181717?style=for-the-badge&logo=githubactions&logoColor=white"> |
 
 
 ## Usage
@@ -54,31 +57,39 @@ $ pip install -r requirements.txt
 ```
 .
 ├── README.md
+├── collect_data/                       데이터 수집을 위한 파이썬 코드
+│   ├── api_calls/
+│   └── dbkit/
+│       └── queries.py                  ETL & ELT PostgreSQL 쿼리
+├── dags/                               Airflow DAGS 코드
+│   ├── collect_and_transfer_to_s3.py
+│   ├── elt_to_analytics.py
+│   └── s3_to_rds.py
+├── docker-compose.yaml
 ├── requirements.txt
-├── .github/workflows/
-├── collect_data/       데이터 수집을 위한 파이썬 코드
-│  ├── collect_data.py
-│  ├── api_calls/
-│  └── playground/
-└── sql/                SQL 정의
-   ├── dcl/
-   └── ddl_raw_data/
+└── sql/                                 SQL 정의
+    ├── dcl/
+    └── ddl_raw_data/
 ```
 
 
 ## How did we create the dashboard
 
+### 1. Project Architecture
+
+![](https://github.com/opensource-tracker/opensource-tracker/assets/74031620/124d47d7-c8b4-4043-a718-d972797d9360)
+
+### 2. Flowchart
+
 ```mermaid
   flowchart LR;
       classDef green color:#022e1f,fill:#5FB404;
       classDef black color:#fff,fill:#2E2E2E;
+      classDef orange color:#fff,fill:#FA5858;
+      classDef blue color:#fff,fill:#336791;
 
-      A["/orgs/{org_name}"]:::black--api_orgs-->B;
-      C["/orgs/{org}/repos"]:::black--api_repos-->B;
-      E["/orgs/{org}/repos/commits"]:::black--api_repos_commits-->B;
-      F["/repos/{repo}/license"]:::black--api_repos_licenses-->B;
-      G["/repos/{repo_full_name}/languages"]:::black--api_repos_languages-->B;
-      H["/repos/{repo}/issues"]:::black--api_repos_issues-->B;
-      I["/licenses/{license}"]:::black--api_licenses-->B;
-      B[DB]--Get Data from AWS RDS-->D[Dashboard]:::green;
+      A[GitHub API]:::black--collect_and_transfer_to_s3-->B;
+      B[S3]:::orange--s3_to_rds-->C[DB]:::blue;
+      C[DB]--elt_to_analytics-->C[DB];
+      C[DB]--Get Data from AWS RDS-->D[Dashboard]:::green;
 ```
