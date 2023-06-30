@@ -58,7 +58,7 @@ VALUES %s;
 ELT_LICENSES_PER_REPOS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.licenses_per_repos;
 CREATE TABLE analytics.licenses_per_repos (
-    repo VARCHAR(255),
+    repo_full_name VARCHAR(255),
     organization VARCHAR(255),
     name VARCHAR(255),
     spdx_id VARCHAR(40)
@@ -66,9 +66,9 @@ CREATE TABLE analytics.licenses_per_repos (
 """
 
 ELT_LICENSES_PER_REPOS_TABLE_INSERT_SQL = """
-INSERT INTO analytics.licenses_per_repos (repo, organization, name, spdx_id)
+INSERT INTO analytics.licenses_per_repos (repo_full_name, organization, name, spdx_id)
 SELECT
-  DISTINCT repos.full_name as repo,
+  DISTINCT repos.full_name as repo_full_name,
   orgs.name as organization,
   ls.name,
   ls.spdx_id
