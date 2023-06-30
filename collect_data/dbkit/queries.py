@@ -96,7 +96,8 @@ CREATE TABLE analytics.recent_repos (
     organization VARCHAR(255),
     stars INT,
     language VARCHAR(255),
-    description TEXT
+    description TEXT,
+    updated_at TIMESTAMP
 );
 """
 
@@ -110,6 +111,7 @@ WITH tmp_recent_repos AS (
             stargazers_count as stars,
             repo.description as description,
             language,
+            repo.updated_at as updated_at,
             repo.called_at,
             ROW_NUMBER() OVER (PARTITION BY repo.name ORDER BY repo.called_at DESC) AS time_rank
         FROM raw_data.api_repos repo
@@ -118,13 +120,14 @@ WITH tmp_recent_repos AS (
     ) AS sub
     WHERE time_rank = 1
 )
-INSERT INTO analytics.recent_repos (repo_name, organization, stars, language, description)
+INSERT INTO analytics.recent_repos (repo_name, organization, stars, language, description, updated_at)
 SELECT
     repo_name,
     organization,
     stars,
     language,
-    description
+    description,
+    updated_at
 FROM tmp_recent_repos;
 """
 
@@ -133,16 +136,18 @@ DROP TABLE IF EXISTS analytics.languages_per_repos;
 CREATE TABLE analytics.languages_per_repos (
     repo_name VARCHAR(255),
     organization VARCHAR(255),
+    repo_full_name VARCHAR(255),
     language VARCHAR(255),
     usage_count INT
 );
 """
 
 ELT_LANGUAGES_PER_REPOS_TABLE_INSERT_SQL = """
-INSERT INTO analytics.languages_per_repos (repo_name, organization, language, usage_count)
+INSERT INTO analytics.languages_per_repos (repo_name, organization, repo_full_name, language, usage_count)
 SELECT
     DISTINCT SPLIT_PART(lang.repo_full_name, '/', 2) as repo_name,
     org.name as organization,
+    repos.full_name as repo_full_name,
     lang.language,
     usage_count
 FROM raw_data.api_repos_languages lang
