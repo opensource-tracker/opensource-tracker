@@ -6,6 +6,7 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from psycopg2.extras import execute_values
 from datetime import datetime
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 def load_from_s3(s3_key: str) -> List[List]:
     """
@@ -44,7 +45,6 @@ def get_object_key(api_name: str, date: datetime) -> str:
 
 @dag(
     dag_id='s3_to_rds',
-    schedule='@daily',
     start_date=datetime(2023, 6, 25, hour=0, minute=0),
     default_args={'retries': 0},
     catchup=False
@@ -54,8 +54,10 @@ def load_to_rds():
     S3에 적재한 /year={yyyy}/month={mm}/day={dd}/api.csv` 형식의 파일을 RDS에 적재합니다.
     """
     begin = EmptyOperator(task_id='begin')
-    end = EmptyOperator(task_id='end')
-
+    elt_to_analytics = TriggerDagRunOperator(
+        task_id='trigger_elt_to_analytics ',
+        trigger_dag_id='elt_to_analytics ',
+    )
     from collect_data.dbkit import queries
 
     begin >> [
@@ -66,7 +68,7 @@ def load_to_rds():
         task_for(api_name='repos_issues', query=queries.API_REPOS_ISSUES_TABLE_INSERT_SQL),
         task_for(api_name='repos_languages', query=queries.API_REPOS_LANGUAGES_TABLE_INSERT_SQL),
         task_for(api_name='repos_licenses', query=queries.API_REPOS_LICENSES_TABLE_INSERT_SQL),
-    ] >> end
+    ] >> elt_to_analytics
 
 def task_for(api_name: str, query: str):
     @task(task_id=f'task_{api_name}')
