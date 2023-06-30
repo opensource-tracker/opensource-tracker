@@ -147,3 +147,28 @@ JOIN raw_data.api_repos repos ON lang.repo_full_name = repos.full_name
 JOIN raw_data.api_orgs org ON repos.owner_id = org.orgs_id
 WHERE lang.called_at = (SELECT called_at FROM raw_data.api_repos_languages ORDER BY 1 DESC LIMIT 1)
 """
+
+
+ELT_ISSUES_PER_ORGS_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.issues_per_orgs;
+CREATE TABLE analytics.issues_per_orgs (
+    organization VARCHAR(255),
+    repo VARCHAR(255),
+    comments INT,
+    title TEXT,
+    created_at TIMESTAMPZ
+);
+"""
+
+ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL = """
+INSERT INTO analytics.issues_per_orgs (organization, repo, comments, title, created_at)
+SELECT
+    org.name as organization,
+    repos.name as repo,
+    issues.comments as comments,
+    issues.title as title,
+    issues.created_at as created_at
+FROM raw_data.api_repos_issues issues
+LEFT JOIN raw_data.api_repos repos ON issues.repo_full_name = repos.full_name
+LEFT JOIN raw_data.api_orgs org ON repos.owner_id = org.orgs_id
+"""

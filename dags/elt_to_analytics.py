@@ -48,6 +48,13 @@ def create_languages_per_repos_table():
     ])
 
 
+@task()
+def create_issues_per_orgs_table():
+    execute_sqls([
+        queries.ELT_ISSUES_PER_ORGS_TABLE_CREATE_SQL,
+        queries.ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL
+    ])
+
 @dag(
     start_date=datetime(2023, 6, 29),
     catchup=False
@@ -59,7 +66,8 @@ def elt_to_analytics():
     begin >> [
         create_licenses_per_repos_table(),
         create_recent_repos_table(),
-        create_languages_per_repos_table()
+        create_languages_per_repos_table(),
+        create_issues_per_orgs_table()
     ] >> end
 
 elt_to_analytics()
