@@ -55,8 +55,8 @@ def load_to_rds():
     """
     begin = EmptyOperator(task_id='begin')
     elt_to_analytics = TriggerDagRunOperator(
-        task_id='trigger_elt_to_analytics ',
-        trigger_dag_id='elt_to_analytics ',
+        task_id='trigger_elt_to_analytics',
+        trigger_dag_id='elt_to_analytics',
     )
     from collect_data.dbkit import queries
 
