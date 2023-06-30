@@ -143,6 +143,9 @@ def extract_data_and_save_csv_to_s3():
         trigger_dag_id='s3_to_rds',
     )
 
-    begin >> create_task('repos') >> [create_task(api_name) for api_name in api_keyword.keys() if api_name != 'repos'] >> s3_to_rds
+    begin \
+    >> create_task('repos') \
+    >> [create_task(api_name) for api_name in api_keyword.keys() if api_name != 'repos'] \
+    >> s3_to_rds
 
 extract_data_and_save_csv_to_s3()

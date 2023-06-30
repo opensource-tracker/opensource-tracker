@@ -57,6 +57,7 @@ def create_languages_per_repos_table():
         queries.ELT_LANGUAGES_PER_REPOS_TABLE_INSERT_SQL
     ])
 
+@task()
 def create_commits_per_repos_and_sha_table():
     """
     raw_data 스키마의 테이블에 기반하여 analytics.commits_per_sha 테이블을 만듭니다.
