@@ -155,7 +155,7 @@ ELT_ISSUES_PER_ORGS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.issues_per_orgs;
 CREATE TABLE analytics.issues_per_orgs (
 	organization VARCHAR(255),
-	repo VARCHAR(255),
+	repo_name VARCHAR(255),
 	comments INT, 
 	title TEXT,
 	created_at TIMESTAMPTZ
@@ -163,7 +163,7 @@ CREATE TABLE analytics.issues_per_orgs (
 """
 
 ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL = """
-INSERT INTO analytics.issues_per_orgs (organization, repo, comments, title, created_at)
+INSERT INTO analytics.issues_per_orgs (organization, repo_name, comments, title, created_at)
 SELECT 
 		org.name AS organization,
         repo.name AS repo_name,
@@ -272,4 +272,4 @@ GROUP BY
 ORDER BY
     commit_date;
 """
->>>>>>> dbbed50a0c6de485b61ee3c00d93115056797160
+
