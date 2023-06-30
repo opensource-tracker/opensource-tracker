@@ -154,18 +154,18 @@ WHERE lang.called_at = (SELECT called_at FROM raw_data.api_repos_languages ORDER
 ELT_ISSUES_PER_ORGS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.issues_per_orgs;
 CREATE TABLE analytics.issues_per_orgs (
-	organization VARCHAR(255),
-	repo_name VARCHAR(255),
-	comments INT, 
-	title TEXT,
-	created_at TIMESTAMPTZ
+    organization VARCHAR(255),
+    repo_name VARCHAR(255),
+    comments INT, 
+    title TEXT,
+    created_at TIMESTAMPTZ
 );
 """
 
 ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL = """
 INSERT INTO analytics.issues_per_orgs (organization, repo_name, comments, title, created_at)
 SELECT 
-		org.name AS organization,
+    org.name AS organization,
         repo.name AS repo_name,
         issue.comments AS comments,
         issue.title AS title,
@@ -173,18 +173,18 @@ SELECT
 FROM raw_data.api_repos_issues AS issue
 LEFT JOIN
      (SELECT
-     		DISTINCT(full_name),
+         DISTINCT(full_name),
             owner_id,
             name
       FROM raw_data.api_repos
       WHERE called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY called_at DESC LIMIT 1)
-	) AS repo ON issue.repo_full_name = repo.full_name
+    ) AS repo ON issue.repo_full_name = repo.full_name
 LEFT JOIN
-	 (SELECT DISTINCT(orgs_id),
-	         name
-	  FROM raw_data.api_orgs
-	  WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
-	 ) AS org ON repo.owner_id = org.orgs_id
+     (SELECT DISTINCT(orgs_id),
+             name
+      FROM raw_data.api_orgs
+      WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
+     ) AS org ON repo.owner_id = org.orgs_id
 WHERE issue.called_at = (SELECT called_at FROM raw_data.api_repos_issues ORDER BY called_at DESC LIMIT 1);
     
 """
@@ -192,42 +192,42 @@ WHERE issue.called_at = (SELECT called_at FROM raw_data.api_repos_issues ORDER B
 ELT_STARS_PER_ORGS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.stars_per_orgs;
 CREATE TABLE analytics.stars_per_orgs (
-	organization VARCHAR(255),
-	repo VARCHAR(255),
-	star_count INT, 
-	language VARCHAR(50),
-	description TEXT
+    organization VARCHAR(255),
+    repo VARCHAR(255),
+    star_count INT, 
+    language VARCHAR(50),
+    description TEXT
 );
 """
 
 ELT_STARS_PER_ORGS_TABLE_INSERT_SQL = """
 INSERT INTO analytics.stars_per_orgs (organization, repo, star_count, language, description)
 SELECT
-	orgs.name AS organization,
-	repo.name AS repo,
-	stargazers_count AS star_count,
-	repo.language,
-	repo.description AS description
+    orgs.name AS organization,
+    repo.name AS repo,
+    stargazers_count AS star_count,
+    repo.language,
+    repo.description AS description
 FROM raw_data.api_repos AS repo
 LEFT JOIN
-	  (SELECT 
-	  		DISTINCT(orgs_id),
-	        name
-	  FROM raw_data.api_orgs
-	  WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
-	  ) AS orgs ON repo.owner_id = orgs.orgs_id
+      (SELECT 
+          DISTINCT(orgs_id),
+            name
+      FROM raw_data.api_orgs
+      WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
+      ) AS orgs ON repo.owner_id = orgs.orgs_id
 WHERE called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY called_at DESC LIMIT 1);
 """
 
 ELT_REPOS_COMMITS_PER_PER_REPOS_AND_SHA_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.commits_per_sha;
 CREATE TABLE analytics.commits_per_sha (
-	sha	varchar(255),
-	commit_author_name varchar(70),
-	commit_author_date	timestamp,
-	commit_message text,
-	repo_full_name varchar(255),
-	called_at timestamp
+    sha    varchar(255),
+    commit_author_name varchar(70),
+    commit_author_date    timestamp,
+    commit_message text,
+    repo_full_name varchar(255),
+    called_at timestamp
 );
 """
 
@@ -272,4 +272,3 @@ GROUP BY
 ORDER BY
     commit_date;
 """
-
