@@ -74,13 +74,16 @@ SELECT
   ls.spdx_id
 FROM raw_data.api_repos repos
 JOIN (
-  SELECT orgs_id, name FROM raw_data.api_orgs WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY 1 DESC LIMIT 1)
+  SELECT orgs_id, name FROM raw_data.api_orgs WHERE called_at =
+  (SELECT called_at FROM raw_data.api_orgs ORDER BY 1 DESC LIMIT 1)
 ) orgs ON repos.owner_id = orgs.orgs_id
 JOIN (
-  SELECT repo_full_name, license_key FROM raw_data.api_repos_licenses WHERE called_at = (SELECT called_at FROM raw_data.api_repos_licenses ORDER BY 1 DESC LIMIT 1)
+  SELECT repo_full_name, license_key FROM raw_data.api_repos_licenses WHERE called_at =
+  (SELECT called_at FROM raw_data.api_repos_licenses ORDER BY 1 DESC LIMIT 1)
 ) rl ON repos.full_name = rl.repo_full_name
 JOIN (
-  SELECT key, name, spdx_id FROM raw_data.api_licenses WHERE called_at = (SELECT called_at FROM raw_data.api_licenses ORDER BY 1 DESC LIMIT 1)
+  SELECT key, name, spdx_id FROM raw_data.api_licenses WHERE called_at =
+  (SELECT called_at FROM raw_data.api_licenses ORDER BY 1 DESC LIMIT 1)
 ) ls ON ls.key = rl.license_key
 WHERE repos.called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY 1 DESC LIMIT 1)
 ORDER BY 2;
