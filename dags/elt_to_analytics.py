@@ -92,6 +92,13 @@ def create_issues_per_orgs_table():
         queries.ELT_ISSUES_PER_ORGS_TABLE_INSERT_SQL,
     ])
 
+@task()
+def create_stargazers_count_per_repos_table():
+    execute_sqls([
+        queries.ELT_REPOS_STARGAZERS_COUNT_TABLE_CREATE_SQL,
+        queries.ELT_REPOS_STARGAZERS_COUNT_TABLE_INSERT_SQL,
+    ])
+
 @dag(
     start_date=datetime(2023, 6, 29),
     catchup=False
@@ -107,6 +114,7 @@ def elt_to_analytics():
         create_commits_per_repos_and_sha_table(),
         create_issues_per_orgs_table(),
         create_stars_per_orgs_table(),
+        create_stargazers_count_per_repos_table(),
     ] >> create_contributors_per_repos_and_day_table() >> end
 
 elt_to_analytics()

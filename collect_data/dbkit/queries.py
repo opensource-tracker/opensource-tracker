@@ -277,3 +277,25 @@ GROUP BY
 ORDER BY
     commit_date;
 """
+
+ELT_REPOS_STARGAZERS_COUNT_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.stargazers_count_per_repos;
+CREATE TABLE analytics.stargazers_count_per_repos (
+    time_interval timestamp,
+    repo_full_name VARCHAR(255),
+    stargazers_count INT
+);
+"""
+
+ELT_REPOS_STARGAZERS_COUNT_TABLE_INSERT_SQL = """
+INSERT INTO analytics.stargazers_count_per_repos
+SELECT
+    called_at AS time_interval,
+    full_name AS repo_full_name,
+    stargazers_count
+FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY DATE(called_at), full_name ORDER BY called_at DESC) seq
+    FROM raw_data.api_repos
+) subquery_alias
+WHERE seq = 1;
+"""
