@@ -9,6 +9,7 @@ from airflow.operators.empty import EmptyOperator
 from airflow.decorators import dag, task
 from airflow.models import Variable
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from typing import Dict, List
 from datetime import datetime
 import csv
@@ -50,7 +51,7 @@ def get_file_path(api_name: str, execution_date):
     year = execution_date.strftime("%Y")
     month = execution_date.strftime("%m")
     day = execution_date.strftime("%d")
-    
+
     return f'data/year={year}/month={month}/day={day}/{api_name}.csv'
 
 
@@ -96,8 +97,12 @@ def get_repos_full_name_from_s3(bucket_name, s3_key):
     hook = S3Hook('s3_conn')
 
     s3_file = hook.select_key(
-        s3_key, bucket_name=bucket_name, expression='SELECT "full_name" FROM S3Object', input_serialization=input_serialization)
-    
+        key=s3_key,
+        bucket_name=bucket_name,
+        expression='SELECT "full_name" FROM S3Object',
+        input_serialization=input_serialization
+    )
+
     return s3_file.rstrip().split('\n')
 
 
@@ -105,7 +110,7 @@ def create_task(api_name):
     @task(task_id=f'task_{api_name}')
     def task_for(api_name: str, **kwargs):
         execution_date = kwargs['execution_date']
-        bucket_name = Variable.get('bucket_name')
+        bucket_name = Variable.get('AWS_S3_BUCKET')
         headers = HEADERS
         orgs = ORGS
         s3_key = get_file_path(api_name, execution_date)
@@ -133,8 +138,11 @@ def create_task(api_name):
 )
 def extract_data_and_save_csv_to_s3():
     begin = EmptyOperator(task_id='begin')
-    end = EmptyOperator(task_id='end')
+    s3_to_rds = TriggerDagRunOperator(
+        task_id='trigger_s3_to_rds',
+        trigger_dag_id='s3_to_rds',
+    )
 
-    begin >> create_task('repos') >> [create_task(api_name) for api_name in api_keyword.keys() if api_name != 'repos'] >> end
+    begin >> create_task('repos') >> [create_task(api_name) for api_name in api_keyword.keys() if api_name != 'repos'] >> s3_to_rds
 
 extract_data_and_save_csv_to_s3()
