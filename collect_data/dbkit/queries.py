@@ -190,8 +190,7 @@ LEFT JOIN
       FROM raw_data.api_orgs
       WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
      ) AS org ON repo.owner_id = org.orgs_id
-WHERE issue.called_at = (SELECT called_at FROM raw_data.api_repos_issues ORDER BY called_at DESC LIMIT 1);
-    
+WHERE issue.called_at = (SELECT called_at FROM raw_data.api_repos_issues ORDER BY called_at DESC LIMIT 1); 
 """
 
 ELT_STARS_PER_ORGS_TABLE_CREATE_SQL = """
@@ -224,9 +223,9 @@ LEFT JOIN
 WHERE called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY called_at DESC LIMIT 1);
 """
 
-ELT_REPOS_COMMITS_PER_PER_REPOS_AND_SHA_TABLE_CREATE_SQL = """
-DROP TABLE IF EXISTS analytics.commits_per_sha;
-CREATE TABLE analytics.commits_per_sha (
+ELT_COMMITS_PER_REPOS_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.commits_per_repos;
+CREATE TABLE analytics.commits_per_repos (
     sha    varchar(255),
     commit_author_name varchar(70),
     commit_author_date    timestamp,
@@ -236,31 +235,27 @@ CREATE TABLE analytics.commits_per_sha (
 );
 """
 
-ELT_TEMP_REPOS_COMMITS_PER_REPOS_AND_SHA_TABLE_CREATE_SQL = """
-CREATE TEMP TABLE t_commits_per_sha AS SELECT * FROM raw_data.api_repos_commits;
-"""
-
-ELT_COMMITS_PER_REPOS_AND_SHA_TABLE_INCREMENTAL_UPDATE_SQL = """
-INSERT INTO analytics.commits_per_sha
+ELT_COMMITS_PER_REPOS_TABLE_INSERT_SQL = """
+INSERT INTO analytics.commits_per_repos
 SELECT sha, commit_author_name, commit_author_date, commit_message, repo_full_name, called_at
 FROM (
     SELECT *, ROW_NUMBER() OVER (PARTITION BY sha ORDER BY called_at DESC) seq
-    FROM t_commits_per_sha
+    FROM raw_data.api_repos_commits
 ) subquery_alias
 WHERE seq = 1;
 """
 
-ELT_REPOS_CONTRIBUTORS_COUNT_PER_REPOS_AND_DAY_TABLE_CREATE_SQL = """
-DROP TABLE IF EXISTS analytics.contributors_per_day;
-CREATE TABLE analytics.contributors_per_day (
+ELT_CONTRIBUTORS_COUNT_PER_REPOS_TABLE_CREATE_SQL = """
+DROP TABLE IF EXISTS analytics.contributors_per_repos;
+CREATE TABLE analytics.contributors_per_repos (
     commit_date DATE,
     commit_author_name VARCHAR(70),
     repo_full_name VARCHAR(255)
 );
 """
 
-ELT_REPOS_CONTRIBUTORS_COUNT_PER_REPOS_AND_DAY_TABLE_INSERT_SQL = """
-INSERT INTO analytics.contributors_per_day (commit_date, commit_author_name, repo_full_name)
+ELT_CONTRIBUTORS_COUNT_PER_REPOS_TABLE_INSERT_SQL = """
+INSERT INTO analytics.contributors_per_repos (commit_date, commit_author_name, repo_full_name)
 SELECT
     DATE(commit_author_date) AS commit_date,
     commit_author_name,
@@ -278,7 +273,7 @@ ORDER BY
     commit_date;
 """
 
-ELT_REPOS_STARGAZERS_COUNT_TABLE_CREATE_SQL = """
+ELT_STARGAZERS_COUNT_PER_REPOS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.stargazers_count_per_repos;
 CREATE TABLE analytics.stargazers_count_per_repos (
     time_interval timestamp,
@@ -287,7 +282,7 @@ CREATE TABLE analytics.stargazers_count_per_repos (
 );
 """
 
-ELT_REPOS_STARGAZERS_COUNT_TABLE_INSERT_SQL = """
+ELT_STARGAZERS_COUNT_PER_REPOS_TABLE_INSERT_SQL = """
 INSERT INTO analytics.stargazers_count_per_repos
 SELECT
     called_at AS time_interval,
