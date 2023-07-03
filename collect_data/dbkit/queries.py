@@ -193,36 +193,6 @@ LEFT JOIN
 WHERE issue.called_at = (SELECT called_at FROM raw_data.api_repos_issues ORDER BY called_at DESC LIMIT 1); 
 """
 
-ELT_STARS_PER_ORGS_TABLE_CREATE_SQL = """
-DROP TABLE IF EXISTS analytics.stars_per_orgs;
-CREATE TABLE analytics.stars_per_orgs (
-    organization VARCHAR(255),
-    repo VARCHAR(255),
-    star_count INT, 
-    language VARCHAR(50),
-    description TEXT
-);
-"""
-
-ELT_STARS_PER_ORGS_TABLE_INSERT_SQL = """
-INSERT INTO analytics.stars_per_orgs (organization, repo, star_count, language, description)
-SELECT
-    orgs.name AS organization,
-    repo.name AS repo,
-    stargazers_count AS star_count,
-    repo.language,
-    repo.description AS description
-FROM raw_data.api_repos AS repo
-LEFT JOIN
-      (SELECT 
-          DISTINCT(orgs_id),
-            name
-      FROM raw_data.api_orgs
-      WHERE called_at = (SELECT called_at FROM raw_data.api_orgs ORDER BY called_at DESC LIMIT 1)
-      ) AS orgs ON repo.owner_id = orgs.orgs_id
-WHERE called_at = (SELECT called_at FROM raw_data.api_repos ORDER BY called_at DESC LIMIT 1);
-"""
-
 ELT_COMMITS_PER_REPOS_TABLE_CREATE_SQL = """
 DROP TABLE IF EXISTS analytics.commits_per_repos;
 CREATE TABLE analytics.commits_per_repos (
