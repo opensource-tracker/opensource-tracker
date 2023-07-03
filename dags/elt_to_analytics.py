@@ -78,13 +78,6 @@ def create_contributors_per_repos_table():
     ])
 
 @task()
-def create_stars_per_orgs_table():
-    execute_sqls([
-        queries.ELT_STARS_PER_ORGS_TABLE_CREATE_SQL,
-        queries.ELT_STARS_PER_ORGS_TABLE_INSERT_SQL,
-        ])
-
-@task()
 def create_issues_per_orgs_table():
     execute_sqls([
         queries.ELT_ISSUES_PER_ORGS_TABLE_CREATE_SQL,
@@ -112,7 +105,6 @@ def elt_to_analytics():
         create_languages_per_repos_table(),
         create_commits_per_repos_table(),
         create_issues_per_orgs_table(),
-        create_stars_per_orgs_table(),
         create_stargazers_count_per_repos_table(),
     ] >> create_contributors_per_repos_table() >> end
 
