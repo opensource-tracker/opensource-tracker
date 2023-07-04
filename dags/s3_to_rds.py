@@ -61,7 +61,7 @@ def load_to_rds():
     from collect_data.dbkit import queries
 
     begin >> [
-        # task_for(api_name='licenses', query=queries.API_LICENSES_TABLE_INSERT_SQL),
+        task_for(api_name='licenses', query=queries.API_LICENSES_TABLE_INSERT_SQL),
         task_for(api_name='orgs', query=queries.API_ORGS_TABLE_INSERT_SQL),
         task_for(api_name='repos', query=queries.API_REPOS_TABLE_INSERT_SQL),
         task_for(api_name='repos_commits', query=queries.API_REPOS_COMMITS_TABLE_INSERT_SQL),
