@@ -5,6 +5,7 @@ from collect_data.api_calls.api_repos_issues import collect_api_repos_issues
 from collect_data.api_calls.api_repos_commits import collect_api_repos_commits
 from collect_data.api_calls.api_orgs import collect_api_orgs
 from collect_data.api_calls.api_repos import collect_api_repos
+from collect_data.api_calls.api_licenses import collect_api_licenses
 from airflow.operators.empty import EmptyOperator
 from airflow.decorators import dag, task
 from airflow.models import Variable
@@ -34,7 +35,7 @@ LICENSES = [
 api_keyword = {
     'repos': [collect_api_repos, "API_REPOS_TABLE_INSERT_SQL"],
     'orgs': [collect_api_orgs, "API_ORGS_TABLE_INSERT_SQL"],
-    # 'licenses': [],
+    'licenses': [collect_api_licenses, "API_LICENSES_TABLE_INSERT_SQL"],
     'repos_commits': [collect_api_repos_commits, "API_REPOS_COMMITS_TABLE_INSERT_SQL"],
     'repos_issues': [collect_api_repos_issues, "API_REPOS_ISSUES_TABLE_INSERT_SQL"],
     'repos_licenses': [collect_api_repos_licenses, "API_REPOS_LICENSES_TABLE_INSERT_SQL"],
@@ -111,13 +112,18 @@ def create_task(api_name):
     def task_for(api_name: str, **kwargs):
         execution_date = kwargs['execution_date']
         bucket_name = Variable.get('AWS_S3_BUCKET')
+
         headers = HEADERS
         orgs = ORGS
+        licenses = LICENSES
+
         s3_key = get_file_path(api_name, execution_date)
 
         if api_name in ['repos_issues', 'repos_commits', 'repos_licenses', 'repos_languages']:
             repos = get_repos_full_name_from_s3(bucket_name, s3_key)
             data = collect_data(api_name, headers, repos, execution_date)
+        elif api_name == 'licenses':
+            data = collect_data(api_name, headers, licenses, execution_date)
         else:
             data = collect_data(api_name, headers, orgs, execution_date)
 
